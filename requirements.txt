@@ -1,0 +1,11 @@
+django
+django-environ
+psycopg2-binary
+whitenoise
+cloudinary
+django-cloudinary-storage
+razorpay
+groq
+qrcode[pil]
+Pillow
+gunicorn
