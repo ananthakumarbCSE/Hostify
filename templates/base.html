@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventSphere{% endblock %}</title>
+</head>
+<body>
+
+    {% include "components/navbar.html" %}
+    {% include "components/messages.html" %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/_footer.html" %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

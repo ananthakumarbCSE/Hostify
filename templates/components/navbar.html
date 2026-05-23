@@ -1,0 +1,18 @@
+<nav>
+    <a href="/">EventSphere</a>
+    <a href="{% url 'events:list' %}">Browse Events</a>
+
+    {% if user.is_authenticated %}
+
+        <a href="{% url 'dashboard:events' %}">Dashboard</a>
+        <span>{{ user.get_full_name }}</span>
+        <a href="{% url 'accounts:logout' %}">Logout</a>
+        {% include "partials/_notification_badge.html" %}
+
+    {% else %}
+
+        <a href="{% url 'accounts:login' %}">Login</a>
+        <a href="{% url 'accounts:register' %}">Register</a>
+        
+    {% endif %}
+</nav>

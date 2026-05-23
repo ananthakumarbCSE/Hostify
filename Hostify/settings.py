@@ -11,9 +11,15 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,6 +43,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # my added apps
+    'accounts',
+    "events",
+    "tickets",
+    "community",
+    "dashboard",
+    "ai_services",
+    "payments",
+    
+    # images storgae place
+    "cloudinary",
+    "cloudinary_storage"
 ]
 
 MIDDLEWARE = [
@@ -47,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'Hostify.urls'
@@ -54,13 +74,14 @@ ROOT_URLCONF = 'Hostify.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.notifications'
             ],
         },
     },
@@ -114,4 +135,40 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# My added configurations
+
+AUTH_USER_MODEL = "accounts.User"
+
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/dashboard/events"
+
+
+# evvironment variable loading
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY":    env("CLOUDINARY_API_KEY"),
+    "API_SECRET": env("CLOUDINARY_API_SECRET"),
+}
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+RAZORPAY_KEY_ID     = env("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = env("RAZORPAY_KEY_SECRET")
+
+GROQ_API_KEY   = env("GROQ_API_KEY")
+GROQ_MODEL     = env("GROQ_MODEL", default="llama3-70b-8192")
+
+EMAIL_BACKEND       = env("EMAIL_BACKEND",
+                          default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST          = env("EMAIL_HOST", default="")
+EMAIL_PORT          = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER     = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS       = True
+DEFAULT_FROM_EMAIL  = env("DEFAULT_FROM_EMAIL", default="noreply@eventsphere.io")
+
