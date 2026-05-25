@@ -1,0 +1,56 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Check-in - {{ event.title }}{% endblock %}
+{% block dashboard_content %}
+
+<h1>Check-in: {{ event.title }}</h1>
+
+<p>Registered: {{ total_registered }}</p>
+<p>Checked In: <span id="checked-count">{{ total_checked }}</span></p>
+
+<h2>Scan Ticket</h2>
+<input type="text" id="qr-input" placeholder="Enter QR token / scan QR code here">
+<button onclick="scanTicket()">Check In</button>
+<p id="scan-result"></p>
+
+<h2>Recent Check-ins</h2>
+<ul id="checkin-feed">
+    {% for ticket in recent_checkins %}
+        <li>{{ ticket.attendee.get_full_name }} — {{ ticket.tier.name }} — {{ ticket.checkin.scanned_at }}</li>
+    {% empty %}
+        <li>No check-ins yet.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function scanTicket() {
+    const token = document.getElementById('qr-input').value.trim();
+    if (!token) return;
+
+    fetch("{% url 'dashboard:checkin_scan' %}", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify({token: token})
+    })
+    .then(r => r.json())
+    .then(data => {
+        const result = document.getElementById('scan-result');
+        if (data.ok) {
+            result.innerText = 'Checked in: ' + data.attendee + ' (' + data.tier + ')';
+            const count = document.getElementById('checked-count');
+            count.innerText = parseInt(count.innerText) + 1;
+
+            const feed = document.getElementById('checkin-feed');
+            const li = document.createElement('li');
+            li.innerText = data.attendee + ' — ' + data.tier + ' — just now';
+            feed.prepend(li);
+        } else {
+            result.innerText = 'Error: ' + data.error;
+        }
+        document.getElementById('qr-input').value = '';
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block dashboard_content %}
+
+<h1>Dashboard</h1>
+
+{% if user.is_organizer %}
+    <h2>Your Events</h2>
+    <p>Total Revenue: ₹{{ total_revenue }}</p>
+    <a href="{% url 'dashboard:create_event' %}">+ Create New Event</a>
+
+    {% for event in org_events %}
+        <div>
+            <h3>{{ event.title }}</h3>
+            <p>Status: {{ event.get_status_display }}</p>
+            <p>Date: {{ event.start_datetime }}</p>
+            <a href="{% url 'dashboard:event_manage' event.pk %}">Manage</a>
+            <a href="{% url 'dashboard:edit_event' event.pk %}">Edit</a>
+            <a href="{% url 'dashboard:checkin' event.pk %}">Check-in Panel</a>
+            <form method="post" action="{% url 'dashboard:delete_event' event.pk %}">
+                {% csrf_token %}
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+    {% empty %}
+        <p>You have not created any events yet.</p>
+    {% endfor %}
+{% endif %}
+
+{% if user.is_attendee %}
+    <h2>Your Tickets</h2>
+    {% for ticket in my_tickets %}
+        {% include "components/ticket_card.html" %}
+    {% empty %}
+        <p>No tickets yet. <a href="{% url 'events:list' %}">Browse events</a></p>
+    {% endfor %}
+
+    <h2>Wishlist</h2>
+    {% for item in wishlist %}
+        {% with event=item.event %}
+            {% include "components/event_card.html" %}
+        {% endwith %}
+    {% empty %}
+        <p>Your wishlist is empty.</p>
+    {% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,9 @@
+<div>
+    <p>Event: {{ ticket.tier.event.title }}</p>
+    <p>Tier: {{ ticket.tier.name }}</p>
+    <p>Status: {{ ticket.status }}</p>
+    <p>Issued: {{ ticket.issued_at }}</p>
+    {% if ticket.qr_code %}
+        <img src="{{ ticket.qr_code.url }}" alt="QR Code">
+    {% endif %}
+</div>

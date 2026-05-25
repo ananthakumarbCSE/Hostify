@@ -1,0 +1,168 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Edit Event - {{ event.title }}{% endblock %}
+{% block dashboard_content %}
+
+<h1>Edit Event: {{ event.title }}</h1>
+
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h2>Basic Info</h2>
+    <div class="form-section">
+        {{ form.title.label_tag }} {{ form.title }}
+        {% if form.title.errors %}<span class="error">{{ form.title.errors }}</span>{% endif %}
+        
+        {{ form.category.label_tag }} {{ form.category }}
+        {% if form.category.errors %}<span class="error">{{ form.category.errors }}</span>{% endif %}
+        
+        {{ form.mode.label_tag }} {{ form.mode }}
+        {% if form.mode.errors %}<span class="error">{{ form.mode.errors }}</span>{% endif %}
+        
+        {{ form.price_type.label_tag }} {{ form.price_type }}
+        {% if form.price_type.errors %}<span class="error">{{ form.price_type.errors }}</span>{% endif %}
+        
+        {{ form.status.label_tag }} {{ form.status }}
+        {% if form.status.errors %}<span class="error">{{ form.status.errors }}</span>{% endif %}
+        
+        {{ form.start_datetime.label_tag }} {{ form.start_datetime }}
+        {% if form.start_datetime.errors %}<span class="error">{{ form.start_datetime.errors }}</span>{% endif %}
+        
+        {{ form.end_datetime.label_tag }} {{ form.end_datetime }}
+        {% if form.end_datetime.errors %}<span class="error">{{ form.end_datetime.errors }}</span>{% endif %}
+        
+        {{ form.description.label_tag }} {{ form.description }}
+        {% if form.description.errors %}<span class="error">{{ form.description.errors }}</span>{% endif %}
+        
+        {{ form.ai_knowledge.label_tag }} {{ form.ai_knowledge }}
+        {% if form.ai_knowledge.errors %}<span class="error">{{ form.ai_knowledge.errors }}</span>{% endif %}
+        
+        {{ form.logo.label_tag }} {{ form.logo }}
+        {% if form.logo.errors %}<span class="error">{{ form.logo.errors }}</span>{% endif %}
+        
+        {{ form.banner.label_tag }} {{ form.banner }}
+        {% if form.banner.errors %}<span class="error">{{ form.banner.errors }}</span>{% endif %}
+        
+        {{ form.chief_guest.label_tag }} {{ form.chief_guest }}
+        {% if form.chief_guest.errors %}<span class="error">{{ form.chief_guest.errors }}</span>{% endif %}
+        
+        {{ form.total_capacity.label_tag }} {{ form.total_capacity }}
+        {% if form.total_capacity.errors %}<span class="error">{{ form.total_capacity.errors }}</span>{% endif %}
+        
+        {{ form.venue_name.label_tag }} {{ form.venue_name }}
+        {% if form.venue_name.errors %}<span class="error">{{ form.venue_name.errors }}</span>{% endif %}
+        
+        {{ form.venue_address.label_tag }} {{ form.venue_address }}
+        {% if form.venue_address.errors %}<span class="error">{{ form.venue_address.errors }}</span>{% endif %}
+        
+        {{ form.venue_city.label_tag }} {{ form.venue_city }}
+        {% if form.venue_city.errors %}<span class="error">{{ form.venue_city.errors }}</span>{% endif %}
+        
+        {{ form.venue_lat.label_tag }} {{ form.venue_lat }}
+        {% if form.venue_lat.errors %}<span class="error">{{ form.venue_lat.errors }}</span>{% endif %}
+        
+        {{ form.venue_lng.label_tag }} {{ form.venue_lng }}
+        {% if form.venue_lng.errors %}<span class="error">{{ form.venue_lng.errors }}</span>{% endif %}
+        
+        {{ form.online_link.label_tag }} {{ form.online_link }}
+        {% if form.online_link.errors %}<span class="error">{{ form.online_link.errors }}</span>{% endif %}
+    </div>
+
+    <h2>Ticket Tiers</h2>
+    <div class="formset-section">
+        {{ tier_forms.management_form }}
+        {% if tier_forms.non_form_errors %}
+            <div class="error">{{ tier_forms.non_form_errors }}</div>
+        {% endif %}
+        {% for tf in tier_forms %}
+            <div class="formset-item">
+                {% if tf.non_field_errors %}
+                    <div class="error">{{ tf.non_field_errors }}</div>
+                {% endif %}
+                {{ tf.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Sessions</h2>
+    <div class="formset-section">
+        {{ session_forms.management_form }}
+        {% if session_forms.non_form_errors %}
+            <div class="error">{{ session_forms.non_form_errors }}</div>
+        {% endif %}
+        {% for sf in session_forms %}
+            <div class="formset-item">
+                {% if sf.non_field_errors %}
+                    <div class="error">{{ sf.non_field_errors }}</div>
+                {% endif %}
+                {{ sf.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Discount Codes</h2>
+    <div class="formset-section">
+        {{ discount_forms.management_form }}
+        {% if discount_forms.non_form_errors %}
+            <div class="error">{{ discount_forms.non_form_errors }}</div>
+        {% endif %}
+        {% for df in discount_forms %}
+            <div class="formset-item">
+                {% if df.non_field_errors %}
+                    <div class="error">{{ df.non_field_errors }}</div>
+                {% endif %}
+                {{ df.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>FAQs</h2>
+    <div class="formset-section">
+        {{ faq_forms.management_form }}
+        {% if faq_forms.non_form_errors %}
+            <div class="error">{{ faq_forms.non_form_errors }}</div>
+        {% endif %}
+        {% for faq_f in faq_forms %}
+            <div class="formset-item">
+                {% if faq_f.non_field_errors %}
+                    <div class="error">{{ faq_f.non_field_errors }}</div>
+                {% endif %}
+                {{ faq_f.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Sponsors</h2>
+    <div class="formset-section">
+        {{ sponsor_forms.management_form }}
+        {% if sponsor_forms.non_form_errors %}
+            <div class="error">{{ sponsor_forms.non_form_errors }}</div>
+        {% endif %}
+        {% for spf in sponsor_forms %}
+            <div class="formset-item">
+                {% if spf.non_field_errors %}
+                    <div class="error">{{ spf.non_field_errors }}</div>
+                {% endif %}
+                {{ spf.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+<form method="post" action="{% url 'dashboard:delete_event' event.pk %}" style="margin-top: 20px;">
+    {% csrf_token %}
+    <button type="submit" style="background-color: red; color: white;">Delete Event</button>
+</form>
+
+{% endblock %}

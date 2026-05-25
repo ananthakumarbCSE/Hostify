@@ -1,0 +1,26 @@
+<aside>
+    <p>{{ user.get_full_name }}</p>
+    <p>{{ user.get_role_display }}</p>
+
+    <nav>
+        <a href="{% url 'dashboard:events' %}">My Events</a>
+        <a href="{% url 'dashboard:profile' %}">Profile</a>
+        <a href="{% url 'dashboard:notifications' %}">
+            Notifications
+            {% if unread_notifications %}({{ unread_notifications }}){% endif %}
+        </a>
+
+        {% if user.is_organizer %}
+            <strong>Organiser</strong>
+            <a href="{% url 'dashboard:create_event' %}">Create Event</a>
+        {% endif %}
+
+        {% if user.is_attendee %}
+            <strong>Attendee</strong>
+            <a href="{% url 'dashboard:activity' %}">My Tickets</a>
+            <a href="{% url 'dashboard:history' %}">History</a>
+        {% endif %}
+
+        <a href="{% url 'accounts:logout' %}">Logout</a>
+    </nav>
+</aside>

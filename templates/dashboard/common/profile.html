@@ -1,0 +1,85 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Profile{% endblock %}
+{% block dashboard_content %}
+
+<h1>My Profile</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h2>Basic Info</h2>
+    <label>First Name</label>
+    <input type="text" name="first_name" value="{{ user.first_name }}">
+
+    <label>Last Name</label>
+    <input type="text" name="last_name" value="{{ user.last_name }}">
+
+    <label>Email</label>
+    <input type="email" name="email" value="{{ user.email }}">
+
+    <label>Bio</label>
+    <textarea name="bio">{{ user.bio }}</textarea>
+
+    <label>Profile Photo</label>
+    {% if user.photo %}
+        <img src="{{ user.photo.url }}" alt="Current photo">
+    {% endif %}
+    <input type="file" name="photo" accept="image/*">
+
+    <label>Role</label>
+    <select name="role">
+        <option value="attendee" {% if user.role == "attendee" %}selected{% endif %}>Attendee</option>
+        <option value="organizer" {% if user.role == "organizer" %}selected{% endif %}>Organizer</option>
+        <option value="both" {% if user.role == "both" %}selected{% endif %}>Both</option>
+    </select>
+
+    {% if user.is_attendee %}
+        <h2>Attendee Info</h2>
+        <label>Interests</label>
+        <input type="text" name="interests" value="{{ profile.interests }}">
+
+        <label>Expertise</label>
+        <input type="text" name="expertise" value="{{ profile.expertise }}">
+
+        <h2>Social Links</h2>
+        <label>LinkedIn</label>
+        <input type="url" name="linkedin" value="{{ profile.linkedin }}">
+
+        <label>Twitter</label>
+        <input type="url" name="twitter" value="{{ profile.twitter }}">
+
+        <label>GitHub</label>
+        <input type="url" name="github" value="{{ profile.github }}">
+
+        <label>Website</label>
+        <input type="url" name="website" value="{{ profile.website }}">
+    {% endif %}
+
+    {% if user.is_organizer %}
+        <h2>Organiser Info</h2>
+        <label>Display Name</label>
+        <input type="text" name="display_name" value="{{ org_profile.display_name }}">
+
+        <label>Type</label>
+        <select name="org_type">
+            <option value="individual" {% if org_profile.org_type == "individual" %}selected{% endif %}>Individual</option>
+            <option value="organization" {% if org_profile.org_type == "organization" %}selected{% endif %}>Organization</option>
+        </select>
+
+        <label>Description</label>
+        <textarea name="org_description">{{ org_profile.description }}</textarea>
+
+        <label>Contact Phone</label>
+        <input type="text" name="contact_phone" value="{{ org_profile.contact_phone }}">
+
+        <label>Contact Email</label>
+        <input type="email" name="contact_email" value="{{ org_profile.contact_email }}">
+
+        <label>Website</label>
+        <input type="url" name="org_website" value="{{ org_profile.website }}">
+    {% endif %}
+
+    <button type="submit">Save Changes</button>
+</form>
+
+{% endblock %}

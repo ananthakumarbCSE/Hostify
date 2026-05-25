@@ -161,7 +161,7 @@ RAZORPAY_KEY_ID     = env("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = env("RAZORPAY_KEY_SECRET")
 
 GROQ_API_KEY   = env("GROQ_API_KEY")
-GROQ_MODEL     = env("GROQ_MODEL", default="llama3-70b-8192")
+GROQ_MODEL     = env("GROQ_MODEL", default="llama-3.3-70b-versatile")
 
 EMAIL_BACKEND       = env("EMAIL_BACKEND",
                           default="django.core.mail.backends.console.EmailBackend")

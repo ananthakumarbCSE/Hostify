@@ -1,0 +1,11 @@
+<div>
+    {% if event.banner %}
+        <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+    {% endif %}
+    <h3><a href="{% url 'events:detail' event.slug %}">{{ event.title }}</a></h3>
+    <p>{{ event.category }} | {{ event.mode }} | {{ event.price_type }}</p>
+    <p>{{ event.start_datetime }}</p>
+    {% if event.venue_city %}
+        <p>{{ event.venue_city }}</p>
+    {% endif %}
+</div>

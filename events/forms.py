@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.utils.text import slugify
 import uuid
 from .models import Event, EventSession, EventFAQ, EventSponsor
@@ -38,12 +38,24 @@ class EventForm(forms.ModelForm):
         return event
 
 
+class BaseOptionalFormSet(BaseInlineFormSet):
+    def clean(self):
+        if any(self.errors):
+            return
+        has_any_data = False
+        for form in self.forms:
+            if form.has_changed() and not form.cleaned_data.get('DELETE', False):
+                has_any_data = True
+                break
+
+
 EventSessionFormSet = inlineformset_factory(
     Event,
     EventSession,
     fields=["title", "description", "speaker", "start_time", "end_time", "location", "order"],
     extra=1,
     can_delete=True,
+    formset=BaseOptionalFormSet,
     widgets={
         "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         "end_time":   forms.DateTimeInput(attrs={"type": "datetime-local"}),
@@ -58,6 +70,7 @@ TicketTierFormSet = inlineformset_factory(
             "capacity", "max_per_order", "sale_start", "sale_end", "is_active"],
     extra=1,
     can_delete=True,
+    formset=BaseOptionalFormSet,
     widgets={
         "early_bird_expires": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         "sale_start":         forms.DateTimeInput(attrs={"type": "datetime-local"}),
@@ -71,6 +84,7 @@ DiscountCodeFormSet = inlineformset_factory(
     fields=["code", "discount_type", "value", "max_uses", "expires_at", "is_active"],
     extra=1,
     can_delete=True,
+    formset=BaseOptionalFormSet,
     widgets={
         "expires_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
     },
@@ -82,6 +96,7 @@ EventFAQFormSet = inlineformset_factory(
     fields=["question", "answer", "order"],
     extra=1,
     can_delete=True,
+    formset=BaseOptionalFormSet,
 )
 
 EventSponsorFormSet = inlineformset_factory(
@@ -90,4 +105,5 @@ EventSponsorFormSet = inlineformset_factory(
     fields=["name", "logo", "website", "tier", "amount", "description"],
     extra=1,
     can_delete=True,
+    formset=BaseOptionalFormSet,
 )

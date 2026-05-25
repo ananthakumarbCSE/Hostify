@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+
+{% if event.banner %}
+    <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+{% endif %}
+
+{% if event.logo %}
+    <img src="{{ event.logo.url }}" alt="{{ event.title }} logo">
+{% endif %}
+
+<h1>{{ event.title }}</h1>
+<p>Category: {{ event.get_category_display }}</p>
+<p>Mode: {{ event.get_mode_display }}</p>
+<p>Date: {{ event.start_datetime }} to {{ event.end_datetime }}</p>
+{% if event.venue_name %}
+    <p>Venue: {{ event.venue_name }}, {{ event.venue_address }}, {{ event.venue_city }}</p>
+{% endif %}
+{% if event.online_link %}
+    <p>Online Link: <a href="{{ event.online_link }}">Join Here</a></p>
+{% endif %}
+{% if event.chief_guest %}
+    <p>Chief Guest: {{ event.chief_guest }}</p>
+{% endif %}
+
+<p>{{ event.description }}</p>
+
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'dashboard:wishlist_toggle' %}">
+        {% csrf_token %}
+        <input type="hidden" name="event_id" value="{{ event.pk }}">
+        <button type="submit">
+            {% if in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}
+        </button>
+    </form>
+{% endif %}
+
+<h2>Tickets</h2>
+{% for tier in tiers %}
+    <div>
+        <p>{{ tier.name }} ({{ tier.get_tier_type_display }})</p>
+        <p>Price: ₹{{ tier.current_price }}</p>
+        {% if tier.tickets_remaining is not None %}
+            <p>Available: {{ tier.tickets_remaining }}</p>
+        {% else %}
+            <p>Unlimited seats</p>
+        {% endif %}
+        {% if tier.early_bird_price and tier.early_bird_expires %}
+            <p>Early Bird until {{ tier.early_bird_expires }}</p>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No tickets available yet.</p>
+{% endfor %}
+
+{% if user.is_authenticated and tiers %}
+    <h3>Buy Tickets</h3>
+    <form id="buy-form">
+        {% csrf_token %}
+        <input type="hidden" name="event_id" value="{{ event.pk }}">
+        {% for tier in tiers %}
+            <label>{{ tier.name }} - ₹{{ tier.current_price }}</label>
+            <input type="number" name="tier_{{ tier.pk }}" min="0" max="{{ tier.max_per_order }}" value="0">
+        {% endfor %}
+        <input type="text" name="discount_code" placeholder="Discount code (optional)">
+        <button type="submit">Proceed to Pay</button>
+    </form>
+{% endif %}
+
+{% if sessions %}
+    <h2>Agenda</h2>
+    {% for session in sessions %}
+        <div>
+            <h3>{{ session.title }}</h3>
+            <p>{{ session.start_time }} - {{ session.end_time }}</p>
+            {% if session.speaker %}
+                <p>Speaker: {{ session.speaker.name }}</p>
+            {% endif %}
+            {% if session.location %}
+                <p>Location: {{ session.location }}</p>
+            {% endif %}
+            <p>{{ session.description }}</p>
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if event.sessions.all %}
+    <h2>Speakers</h2>
+    {% for session in sessions %}
+        {% if session.speaker %}
+            <div>
+                {% if session.speaker.photo %}
+                    <img src="{{ session.speaker.photo.url }}" alt="{{ session.speaker.name }}">
+                {% endif %}
+                <p>{{ session.speaker.name }}</p>
+                <p>{{ session.speaker.designation }}</p>
+                <p>{{ session.speaker.bio }}</p>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+{% if faqs %}
+    <h2>FAQ</h2>
+    {% for faq in faqs %}
+        <details>
+            <summary>{{ faq.question }}</summary>
+            <p>{{ faq.answer }}</p>
+        </details>
+    {% endfor %}
+{% endif %}
+
+<h2>Reviews {% if avg_rating %}({{ avg_rating|floatformat:1 }} / 5){% endif %}</h2>
+{% for review in reviews %}
+    <div>
+        <p>{{ review.author.get_full_name }} — {{ review.rating }}/5</p>
+        <p>{{ review.body }}</p>
+        <p>{{ review.created_at }}</p>
+    </div>
+{% empty %}
+    <p>No reviews yet.</p>
+{% endfor %}
+
+<h2>Ask about this event</h2>
+<div id="chatbox">
+    <div id="chat-messages"></div>
+    <input type="text" id="chat-input" placeholder="Ask a question...">
+    <button onclick="sendChat()">Send</button>
+</div>
+
+{% if user.is_authenticated %}
+    <h2>Submit a Question to the Organiser</h2>
+    <form method="post" action="{% url 'community:submit_question' event.pk %}">
+        {% csrf_token %}
+        <textarea name="question" placeholder="Your question..."></textarea>
+        <button type="submit">Submit</button>
+    </form>
+{% endif %}
+
+{% for q in public_questions %}
+    <div>
+        <p>Q: {{ q.question }}</p>
+        {% if q.answer %}
+            <p>A: {{ q.answer }}</p>
+        {% endif %}
+    </div>
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function sendChat() {
+    const input = document.getElementById('chat-input');
+    const messages = document.getElementById('chat-messages');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    messages.innerHTML += '<p>You: ' + msg + '</p>';
+    input.value = '';
+
+    fetch('/api/ai/chatbot/{{ event.pk }}/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify({message: msg})
+    })
+    .then(r => r.json())
+    .then(data => {
+        messages.innerHTML += '<p>Bot: ' + data.reply + '</p>';
+    });
+}
+</script>
+{% endblock %}

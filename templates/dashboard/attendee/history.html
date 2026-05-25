@@ -1,0 +1,42 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}History{% endblock %}
+{% block dashboard_content %}
+
+<h1>Past Events</h1>
+
+{% for ticket in past_tickets %}
+    <div>
+        <h3>{{ ticket.tier.event.title }}</h3>
+        <p>Attended: {{ ticket.tier.event.end_datetime }}</p>
+        <p>Tier: {{ ticket.tier.name }}</p>
+        {% if not ticket.feedback.submitted_at %}
+            <h4>How was this event?</h4>
+            <form method="post" action="{% url 'community:submit_feedback' %}">
+                {% csrf_token %}
+                <input type="hidden" name="ticket_id" value="{{ ticket.pk }}">
+                <label>Rating (1-5)</label>
+                <input type="number" name="rating" min="1" max="5" required>
+                <label>Comments</label>
+                <textarea name="text" placeholder="Your feedback..."></textarea>
+                <button type="submit">Submit Feedback</button>
+            </form>
+        {% else %}
+            <p>Feedback submitted. Thank you!</p>
+        {% endif %}
+        <h4>Write a Public Review</h4>
+        <form method="post" action="{% url 'community:submit_review' ticket.tier.event.pk %}">
+            {% csrf_token %}
+            <label>Rating (1-5)</label>
+            <input type="number" name="rating" min="1" max="5" required>
+            <label>Review</label>
+            <textarea name="body" placeholder="Share your experience..."></textarea>
+            <button type="submit">Post Review</button>
+        </form>
+
+        <a href="{{ ticket.qr_code.url }}" download>Download Ticket</a>
+    </div>
+{% empty %}
+    <p>No past events attended.</p>
+{% endfor %}
+
+{% endblock %}

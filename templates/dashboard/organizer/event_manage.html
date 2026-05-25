@@ -1,0 +1,139 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Manage - {{ event.title }}{% endblock %}
+{% block dashboard_content %}
+
+<h1>{{ event.title }}</h1>
+<a href="{% url 'dashboard:edit_event' event.pk %}">Edit Event</a>
+<a href="{% url 'dashboard:checkin' event.pk %}">Open Check-in Panel</a>
+
+<h2>Overview</h2>
+<p>Total Registered: {{ total_registered }}</p>
+<p>Total Revenue: ₹{{ total_revenue }}</p>
+<p>Checked In: {{ total_checked }}</p>
+
+<h2>Ticket Breakdown</h2>
+{% for tier in tiers %}
+    <p>{{ tier.name }}: {{ tier.tickets_sold }} sold / {{ tier.capacity }} capacity</p>
+{% endfor %}
+
+<h2>Attendee List</h2>
+<a href="?export=csv">Download CSV</a>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Ticket Tier</th>
+        <th>Checked In</th>
+        <th>Issued At</th>
+    </tr>
+    {% for ticket in tickets %}
+        <tr>
+            <td>{{ ticket.attendee.get_full_name }}</td>
+            <td>{{ ticket.attendee.email }}</td>
+            <td>{{ ticket.tier.name }}</td>
+            <td>{{ ticket.checked_in|yesno:"Yes,No" }}</td>
+            <td>{{ ticket.issued_at }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5">No registrations yet.</td></tr>
+    {% endfor %}
+</table>
+
+<h2>Refund Requests</h2>
+{% for refund in refund_requests %}
+    <div>
+        <p>Order #{{ refund.order.pk }} — ₹{{ refund.amount }}</p>
+        <p>Reason: {{ refund.reason }}</p>
+        <p>Status: {{ refund.get_status_display }}</p>
+        {% if refund.status == "requested" %}
+            <form method="post" action="{% url 'dashboard:refund_review' refund.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button type="submit">Approve</button>
+            </form>
+            <form method="post" action="{% url 'dashboard:refund_review' refund.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                <textarea name="review_note" placeholder="Reason for rejection"></textarea>
+                <button type="submit">Reject</button>
+            </form>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No refund requests.</p>
+{% endfor %}
+
+<h2>Attendee Questions</h2>
+{% for qa in questions %}
+    <div>
+        <p>Q: {{ qa.question }} — by {{ qa.asked_by.get_full_name }}</p>
+        {% if not qa.answer %}
+            <form method="post" action="{% url 'community:answer_question' qa.pk %}">
+                {% csrf_token %}
+                <textarea name="answer" placeholder="Your answer..."></textarea>
+                <button type="submit">Answer</button>
+            </form>
+        {% else %}
+            <p>A: {{ qa.answer }}</p>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No questions yet.</p>
+{% endfor %}
+
+<h2>Feedback Summary</h2>
+<p>Average Rating: {{ avg_feedback_rating|floatformat:1|default:"N/A" }} / 5</p>
+{% for fb in feedbacks %}
+    <div>
+        <p>{{ fb.rating }}/5 — {{ fb.text }}</p>
+    </div>
+{% empty %}
+    <p>No feedback received yet.</p>
+{% endfor %}
+
+<h2>Payout</h2>
+{% if payout %}
+    <p>Status: {{ payout.get_status_display }}</p>
+    <p>Gross: ₹{{ payout.gross }}</p>
+    <p>Platform Fee: ₹{{ payout.platform_fee }}</p>
+    <p>Net: ₹{{ payout.net }}</p>
+{% else %}
+    <p>Payout not yet processed.</p>
+{% endif %}
+
+<h2>AI Schedule Builder</h2>
+<p>Current session order:</p>
+{% for session in sessions %}
+    <p>{{ forloop.counter }}. {{ session.title }} ({{ session.speaker.name|default:"No speaker" }})</p>
+{% endfor %}
+<button onclick="buildSchedule()">Suggest Optimal Order (AI)</button>
+<div id="ai-schedule-result"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function buildSchedule() {
+    const sessions = [
+        {% for s in sessions %}
+        {id: {{ forloop.counter0 }}, title: "{{ s.title }}", speaker: "{{ s.speaker.name|default:'' }}", duration_min: {{ s.end_time|timeuntil:s.start_time|default:60 }}},
+        {% endfor %}
+    ];
+
+    fetch('/api/ai/schedule/{{ event.pk }}/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify({sessions: sessions})
+    })
+    .then(r => r.json())
+    .then(data => {
+        let html = '<h3>Suggested Order:</h3><ol>';
+        data.ordered_sessions.forEach(s => {
+            html += '<li>' + s.title + ' — ' + s.reason + '</li>';
+        });
+        html += '</ol>';
+        document.getElementById('ai-schedule-result').innerHTML = html;
+    });
+}
+</script>
+{% endblock %}

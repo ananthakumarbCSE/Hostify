@@ -7,7 +7,7 @@
         <a href="{% url 'dashboard:events' %}">Dashboard</a>
         <span>{{ user.get_full_name }}</span>
         <a href="{% url 'accounts:logout' %}">Logout</a>
-        {% include "partials/_notification_badge.html" %}
+        {% include "components/notification_badge.html" %}
 
     {% else %}
 

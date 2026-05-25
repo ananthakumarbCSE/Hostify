@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Browse Events{% endblock %}
+{% block content %}
+
+<h1>Browse Events</h1>
+
+<form method="get">
+    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search events">
+
+    <select name="category">
+        <option value="">All Categories</option>
+        {% for value, label in category_choices %}
+            <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="mode">
+        <option value="">All Modes</option>
+        {% for value, label in mode_choices %}
+            <option value="{{ value }}" {% if request.GET.mode == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="price">
+        <option value="">Any Price</option>
+        <option value="free" {% if request.GET.price == "free" %}selected{% endif %}>Free</option>
+        <option value="paid" {% if request.GET.price == "paid" %}selected{% endif %}>Paid</option>
+    </select>
+
+    <input type="text" name="city" value="{{ request.GET.city }}" placeholder="City">
+
+    <button type="submit">Filter</button>
+    <a href="{% url 'events:list' %}">Clear</a>
+</form>
+
+<p>{{ events.count }} event(s) found</p>
+
+{% for event in events %}
+    {% include "components/event_card.html" %}
+{% empty %}
+    <p>No events found. Try adjusting your filters.</p>
+{% endfor %}
+
+{% endblock %}

@@ -21,3 +21,28 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("login/",include("accounts.urls"))
 ]
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+handler404 = "django.views.defaults.page_not_found"
+handler500 = "django.views.defaults.server_error"
+
+urlpatterns = [
+
+    path("admin/", admin.site.urls),
+
+    path("", include("events.urls")),           
+    path("", include("accounts.urls")),            
+    path("dashboard/", include("dashboard.urls")),
+    path("api/payments/",  include("payments.urls")),
+    path("api/tickets/",   include("tickets.urls")),
+    path("api/ai/",        include("ai_services.urls")),
+    path("api/community/", include("community.urls")),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+

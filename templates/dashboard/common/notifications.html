@@ -1,0 +1,23 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Notifications{% endblock %}
+{% block dashboard_content %}
+
+<h1>Notifications</h1>
+
+{% for notif in notifications %}
+    <div>
+        <p><strong>{{ notif.title }}</strong></p>
+        <p>{{ notif.message }}</p>
+        <p>{{ notif.created_at }}</p>
+        {% if notif.link %}
+            <a href="{{ notif.link }}">View</a>
+        {% endif %}
+        {% if not notif.is_read %}
+            <span>(Unread)</span>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No notifications.</p>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,6 @@
+<a href="{% url 'dashboard:notifications' %}">
+    Notifications
+    {% if unread_notifications %}
+        ({{ unread_notifications }})
+    {% endif %}
+</a>

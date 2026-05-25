@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}EventSphere - Discover Events{% endblock %}
+{% block content %}
+
+<h1>Welcome to EventSphere</h1>
+<p>Discover and attend events near you.</p>
+<a href="{% url 'events:list' %}">Browse All Events</a>
+
+{% if recommended %}
+    <h2>Recommended for You</h2>
+    {% for event in recommended %}
+        {% include "components/event_card.html" %}
+    {% endfor %}
+{% endif %}
+
+<h2>Upcoming Events</h2>
+{% for event in upcoming %}
+    {% include "components/event_card.html" %}
+{% empty %}
+    <p>No upcoming events.</p>
+{% endfor %}
+
+{% endblock %}
