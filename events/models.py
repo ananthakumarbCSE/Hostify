@@ -78,27 +78,12 @@ class Event(models.Model):
     def is_past(self):
         return self.end_datetime < timezone.now()
 
-
-class Speaker(models.Model):
-    
-    organizer  = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="speakers")
-    name       = models.CharField(max_length=120)
-    bio        = models.TextField(blank=True)
-    photo      = CloudinaryField("speaker_photo", blank=True, null=True)
-    designation= models.CharField(max_length=120, blank=True)
-    linkedin   = models.URLField(blank=True)
-    twitter    = models.URLField(blank=True)
-
-    def __str__(self):
-        return self.name
-
-
 class EventSession(models.Model):
     
     event      = models.ForeignKey(Event, on_delete=models.CASCADE,related_name="sessions")
     title      = models.CharField(max_length=200)
     description= models.TextField(blank=True)
-    speaker    = models.ForeignKey(Speaker, on_delete=models.SET_NULL,null=True, blank=True, related_name="sessions")
+    speaker    = models.CharField(max_length=30,blank=True,default="speaker name")
     start_time = models.DateTimeField()
     end_time   = models.DateTimeField()
     location   = models.CharField(max_length=200, blank=True,help_text="Room / hall / breakout")

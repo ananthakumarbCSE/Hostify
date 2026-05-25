@@ -56,7 +56,7 @@
 
 {% if user.is_authenticated and tiers %}
     <h3>Buy Tickets</h3>
-    <form id="buy-form">
+    <form id="buy-form" method="post" action="{% url 'payments:confirm_order' %}">
         {% csrf_token %}
         <input type="hidden" name="event_id" value="{{ event.pk }}">
         {% for tier in tiers %}
@@ -64,7 +64,7 @@
             <input type="number" name="tier_{{ tier.pk }}" min="0" max="{{ tier.max_per_order }}" value="0">
         {% endfor %}
         <input type="text" name="discount_code" placeholder="Discount code (optional)">
-        <button type="submit">Proceed to Pay</button>
+        <button type="submit">Review Order</button>
     </form>
 {% endif %}
 
@@ -75,7 +75,7 @@
             <h3>{{ session.title }}</h3>
             <p>{{ session.start_time }} - {{ session.end_time }}</p>
             {% if session.speaker %}
-                <p>Speaker: {{ session.speaker.name }}</p>
+                <p>Speaker: {{ session}}</p>
             {% endif %}
             {% if session.location %}
                 <p>Location: {{ session.location }}</p>

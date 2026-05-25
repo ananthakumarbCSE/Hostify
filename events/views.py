@@ -43,8 +43,9 @@ def event_list_view(request):
 
 
 def event_detail_view(request, slug):
+    
     event      = get_object_or_404(Event, slug=slug, status="published")
-    sessions   = event.sessions.select_related("speaker").order_by("order", "start_time")
+    sessions   = event.sessions.all()
     faqs       = event.faqs.all()
     reviews    = event.reviews.filter(is_visible=True).select_related("author").order_by("-created_at")
     questions  = event.attendee_questions.filter(is_public=True).order_by("asked_at")

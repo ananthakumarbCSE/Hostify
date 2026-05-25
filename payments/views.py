@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 import json
 import razorpay
 from django.conf import settings
@@ -12,6 +13,7 @@ from events.models import Event
 from tickets.models import TicketTier, DiscountCode, Ticket
 from accounts.models import Notification
 from .models import Order, OrderItem, Refund, OrganizerPayout
+from decimal import Decimal
 
 # Create your views here.
 
@@ -24,11 +26,14 @@ RAZORPAY_CLIENT = razorpay.Client(
 @require_POST
 def create_order_view(request):
     data       = json.loads(request.body)
-    event      = get_object_or_404(Event, pk=data["event_id"], status="published")
+    event      = get_object_or_404(Event, pk=data.get("event_id"), status="published")
     items_data = data.get("items", [])
 
+    if not items_data:
+        return JsonResponse({"ok": False, "error": "Please select at least one ticket to purchase."}, status=400)
+
     order    = Order.objects.create(user=request.user, event=event)
-    subtotal = 0
+    subtotal = Decimal("0.00")
 
     for item in items_data:
         tier  = get_object_or_404(TicketTier, pk=item["tier_id"], event=event, is_active=True)
@@ -58,7 +63,7 @@ def create_order_view(request):
         except DiscountCode.DoesNotExist:
             pass
 
-    total = max(0, subtotal - discount_amount)
+    total = max(Decimal("0.00"), subtotal - discount_amount)
     order.subtotal        = subtotal
     order.discount_amount = discount_amount
     order.total           = total
@@ -68,10 +73,10 @@ def create_order_view(request):
         order.paid_at = timezone.now()
         order.save()
         _issue_tickets(order)
-        return JsonResponse({"ok": True, "free": True, "redirect": "/dashboard/activity/"})
+        return JsonResponse({"ok": True, "free": True, "redirect": reverse("dashboard:activity")})
 
     rz_order = RAZORPAY_CLIENT.order.create({
-        "amount":   int(total * 100),
+        "amount":   int(total * Decimal("100")),
         "currency": "INR",
         "receipt":  f"order_{order.pk}",
     })
@@ -79,15 +84,90 @@ def create_order_view(request):
     order.save(update_fields=["razorpay_order_id"])
 
     return JsonResponse({
-        "ok":               True,
-        "free":             False,
-        "order_id":         order.pk,
+        "ok":                True,
+        "free":              False,
+        "order_id":          order.pk,
         "razorpay_order_id": order.razorpay_order_id,
-        "amount":           int(total * 100),
-        "key_id":           settings.RAZORPAY_KEY_ID,
-        "name":             event.title,
-        "email":            request.user.email,
-        "contact":          "",
+        "amount":            int(total * Decimal("100")),
+        "key_id":            settings.RAZORPAY_KEY_ID,
+        "name":              event.title,
+        "email":             request.user.email,
+        "callback_url":      reverse("payments:callback"),
+    })
+
+
+@login_required
+@require_POST
+def confirm_order_view(request):
+    event_id = request.POST.get("event_id")
+    event = get_object_or_404(Event, pk=event_id, status="published")
+
+    items = []
+    subtotal = Decimal("0.00")
+    discount_error = ""
+
+    for key, value in request.POST.items():
+        if not key.startswith("tier_"):
+            continue
+        try:
+            tier_id = int(key.split("_", 1)[1])
+            quantity = int(value)
+        except (ValueError, TypeError):
+            continue
+        if quantity <= 0:
+            continue
+
+        tier = get_object_or_404(TicketTier, pk=tier_id, event=event, is_active=True)
+        if tier.max_per_order and quantity > tier.max_per_order:
+            messages.error(request, f"You can only purchase up to {tier.max_per_order} tickets for {tier.name}.")
+            return redirect("events:detail", slug=event.slug)
+
+        remaining = tier.tickets_remaining()
+        if remaining is not None and quantity > remaining:
+            messages.error(request, f"Only {remaining} tickets left for {tier.name}.")
+            return redirect("events:detail", slug=event.slug)
+
+        unit_price = tier.current_price()
+        line_total = unit_price * quantity
+        subtotal += line_total
+        items.append({
+            "tier": tier,
+            "quantity": quantity,
+            "unit_price": unit_price,
+            "line_total": line_total,
+        })
+
+    if not items:
+        messages.error(request, "Please select at least one ticket to purchase.")
+        return redirect("events:detail", slug=event.slug)
+
+    discount_code = request.POST.get("discount_code", "").strip().upper()
+    discount_amount = Decimal("0.00")
+    discount = None
+    if discount_code:
+        try:
+            discount = DiscountCode.objects.get(event=event, code=discount_code)
+            if discount.is_valid():
+                if discount.discount_type == "percentage":
+                    discount_amount = subtotal * discount.value / Decimal("100.00")
+                else:
+                    discount_amount = min(discount.value, subtotal)
+            else:
+                discount_error = "Discount code is not valid or has expired."
+        except DiscountCode.DoesNotExist:
+            discount_error = "Discount code is not valid."
+
+    total = max(Decimal("0.00"), subtotal - discount_amount)
+
+    return render(request, "payments/confirmation.html", {
+        "event": event,
+        "items": items,
+        "subtotal": subtotal,
+        "discount": discount,
+        "discount_amount": discount_amount,
+        "discount_error": discount_error,
+        "total": total,
+        "discount_code": discount_code,
     })
 
 
@@ -114,7 +194,7 @@ def razorpay_callback_view(request):
     order.save()
 
     _issue_tickets(order)
-    return JsonResponse({"ok": True, "redirect": "/payments/success/"})
+    return JsonResponse({"ok": True, "redirect": reverse("payments:success")})
 
 
 def _issue_tickets(order):

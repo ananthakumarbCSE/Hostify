@@ -46,12 +46,12 @@
         <p>Reason: {{ refund.reason }}</p>
         <p>Status: {{ refund.get_status_display }}</p>
         {% if refund.status == "requested" %}
-            <form method="post" action="{% url 'dashboard:refund_review' refund.pk %}">
+            <form method="post" action="{% url 'payments:refund_review' refund.pk %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="approve">
                 <button type="submit">Approve</button>
             </form>
-            <form method="post" action="{% url 'dashboard:refund_review' refund.pk %}">
+            <form method="post" action="{% url 'payments:refund_review' refund.pk %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="reject">
                 <textarea name="review_note" placeholder="Reason for rejection"></textarea>
@@ -104,7 +104,7 @@
 <h2>AI Schedule Builder</h2>
 <p>Current session order:</p>
 {% for session in sessions %}
-    <p>{{ forloop.counter }}. {{ session.title }} ({{ session.speaker.name|default:"No speaker" }})</p>
+    <p>{{ forloop.counter }}. {{ session.title }} ({{ session.speaker }})</p>
 {% endfor %}
 <button onclick="buildSchedule()">Suggest Optimal Order (AI)</button>
 <div id="ai-schedule-result"></div>

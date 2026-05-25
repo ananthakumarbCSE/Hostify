@@ -275,7 +275,7 @@ def event_manage_view(request, event_id):
                    .filter(tier__event=event, status="confirmed")
                    .select_related("attendee", "tier"))
     tiers       = event.ticket_tiers.all()
-    sessions    = event.sessions.select_related("speaker").order_by("order")
+    sessions    = event.sessions.all()
     questions   = event.attendee_questions.select_related("asked_by").order_by("asked_at")
     refund_reqs = (Refund.objects
                    .filter(order__event=event)
@@ -430,5 +430,4 @@ def wishlist_toggle_view(request):
     obj, created = EventWishlist.objects.get_or_create(user=request.user, event=event)
     if not created:
         obj.delete()
-        return JsonResponse({"wishlisted": False})
-    return JsonResponse({"wishlisted": True})
+    return redirect("events:detail", slug=event.slug)

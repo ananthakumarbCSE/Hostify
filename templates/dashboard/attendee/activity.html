@@ -19,7 +19,7 @@
         <a href="{{ ticket.qr_code.url }}" download>Download Ticket</a>
 
         {% if ticket.status == "confirmed" %}
-            <form method="post" action="{% url 'dashboard:refund_request' ticket.order.pk %}">
+            <form method="post" action="{% url 'payments:refund_request' ticket.order.pk %}">
                 {% csrf_token %}
                 <textarea name="reason" placeholder="Reason for refund"></textarea>
                 <button type="submit">Request Refund</button>

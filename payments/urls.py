@@ -5,6 +5,7 @@ app_name = "payments"
 
 urlpatterns = [
     path("create-order/",       views.create_order_view,      name="create_order"),
+    path("confirm-order/",      views.confirm_order_view,     name="confirm_order"),
     path("callback/",           views.razorpay_callback_view,  name="callback"),
     path("success/",            views.payment_success_view,    name="success"),
     path("failed/",             views.payment_failed_view,     name="failed"),

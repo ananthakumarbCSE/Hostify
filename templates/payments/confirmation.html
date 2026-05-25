@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Confirm Order — {{ event.title }}{% endblock %}
+{% block content %}
+<h1>Confirm Your Order</h1>
+<p>Event: <strong>{{ event.title }}</strong></p>
+<p>Date: {{ event.start_datetime }} to {{ event.end_datetime }}</p>
+
+<table>
+    <thead>
+        <tr><th>Ticket</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.tier.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.unit_price }}</td>
+            <td>₹{{ item.line_total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr><td colspan="3">Subtotal</td><td>₹{{ subtotal }}</td></tr>
+        {% if discount_amount > 0 %}
+        <tr><td colspan="3">Discount{% if discount %} ({{ discount.code }}){% endif %}</td><td>-₹{{ discount_amount }}</td></tr>
+        {% endif %}
+        <tr><td colspan="3"><strong>Total</strong></td><td><strong>₹{{ total }}</strong></td></tr>
+    </tfoot>
+</table>
+
+{% if discount_error %}
+    <p style="color: #d00;">{{ discount_error }}</p>
+{% endif %}
+
+<form id="confirm-form">
+    {% csrf_token %}
+    <input type="hidden" name="event_id" value="{{ event.pk }}">
+    <input type="hidden" name="discount_code" value="{{ discount_code }}">
+    {% for item in items %}
+        <input type="hidden" name="tier_{{ item.tier.pk }}" value="{{ item.quantity }}">
+    {% endfor %}
+    <button type="submit">Pay Now</button>
+</form>
+
+<p><a href="{% url 'events:detail' event.slug %}">Change ticket selection</a></p>
+<p>After payment, you will receive QR code tickets in your dashboard for event check-in and verification.</p>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('confirm-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const eventId = form.querySelector('[name="event_id"]').value;
+    const discountCode = form.querySelector('[name="discount_code"]').value.trim();
+    const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+    const items = [
+        {% for item in items %}
+        {tier_id: {{ item.tier.pk }}, qty: {{ item.quantity }} },
+        {% endfor %}
+    ];
+
+    const response = await fetch('/api/payments/create-order/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({
+            event_id: eventId,
+            items: items,
+            discount_code: discountCode,
+        }),
+    });
+
+    const data = await response.json();
+    if (!data.ok) {
+        alert(data.error || 'Unable to create order. Please try again.');
+        return;
+    }
+
+    if (data.free) {
+        window.location = data.redirect;
+        return;
+    }
+
+    const options = {
+        key: data.key_id,
+        amount: data.amount,
+        currency: 'INR',
+        name: '{{ event.title|escapejs }}',
+        description: 'Ticket Purchase',
+        order_id: data.razorpay_order_id,
+        prefill: {
+            email: '{{ request.user.email|default:''|escapejs }}',
+        },
+        handler: async function (response) {
+            const callbackResponse = await fetch('/api/payments/callback/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(response),
+            });
+            const result = await callbackResponse.json();
+            if (result.ok) {
+                window.location = result.redirect;
+            } else {
+                alert(result.error || 'Payment verification failed.');
+            }
+        },
+        modal: {
+            ondismiss: function () {
+                alert('Payment process was cancelled. You can try again anytime.');
+            }
+        }
+    };
+
+    const razorpay = new Razorpay(options);
+    razorpay.open();
+});
+</script>
+{% endblock %}
