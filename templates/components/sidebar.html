@@ -1,26 +1,50 @@
-<aside>
-    <p>{{ user.get_full_name }}</p>
-    <p>{{ user.get_role_display }}</p>
+<aside class="w-64 bg-white h-screen shadow-lg border-r-4 border-serene-200 p-6 sticky top-0">
+    <!-- User Info -->
+    <div class="mb-8 pb-6 border-b-2 border-serene-100">
+        <div class="w-12 h-12 bg-serene-300 rounded-full flex items-center justify-center text-white font-bold text-lg mb-3">
+            {{ user.get_full_name|first }}
+        </div>
+        <h3 class="font-bold text-serene-900 text-lg">{{ user.get_full_name }}</h3>
+        <p class="text-serene-500 text-sm">{{ user.get_role_display }}</p>
+    </div>
 
-    <nav>
-        <a href="{% url 'dashboard:events' %}">My Events</a>
-        <a href="{% url 'dashboard:profile' %}">Profile</a>
-        <a href="{% url 'dashboard:notifications' %}">
-            Notifications
-            {% if unread_notifications %}({{ unread_notifications }}){% endif %}
+    <!-- Navigation -->
+    <nav class="space-y-2">
+        <a href="{% url 'dashboard:events' %}" class="block px-4 py-3 rounded-lg text-serene-700 hover:bg-serene-100 hover:text-serene-900 transition font-medium">
+             My Events
+        </a>
+        <a href="{% url 'dashboard:profile' %}" class="block px-4 py-3 rounded-lg text-serene-700 hover:bg-serene-100 hover:text-serene-900 transition font-medium">
+             Profile
+        </a>
+        <a href="{% url 'dashboard:notifications' %}" class="block px-4 py-3 rounded-lg text-serene-700 hover:bg-serene-100 hover:text-serene-900 transition font-medium">
+             Notifications {% if unread_notifications %}<span class="ml-2 bg-serene-500 text-white text-xs px-2 py-1 rounded-full">{{ unread_notifications }}</span>{% endif %}
         </a>
 
         {% if user.is_organizer %}
-            <strong>Organiser</strong>
-            <a href="{% url 'dashboard:create_event' %}">Create Event</a>
+            <div class="pt-4 border-t-2 border-serene-200">
+                <p class="px-4 py-2 text-serene-600 font-bold text-sm uppercase tracking-wide">Organizer</p>
+                <a href="{% url 'dashboard:create_event' %}" class="block px-4 py-3 rounded-lg text-serene-700 hover:bg-serene-300 hover:text-white transition font-medium">
+                     Create Event
+                </a>
+            </div>
         {% endif %}
 
         {% if user.is_attendee %}
-            <strong>Attendee</strong>
-            <a href="{% url 'dashboard:activity' %}">My Tickets</a>
-            <a href="{% url 'dashboard:history' %}">History</a>
+            <div class="pt-4 border-t-2 border-serene-200">
+                <p class="px-4 py-2 text-serene-600 font-bold text-sm uppercase tracking-wide">Attendee</p>
+                <a href="{% url 'dashboard:activity' %}" class="block px-4 py-3 rounded-lg text-serene-700 hover:bg-serene-100 hover:text-serene-900 transition font-medium">
+                     My Tickets
+                </a>
+                <a href="{% url 'dashboard:history' %}" class="block px-4 py-3 rounded-lg text-serene-700 hover:bg-serene-100 hover:text-serene-900 transition font-medium">
+                     History
+                </a>
+            </div>
         {% endif %}
 
-        <a href="{% url 'accounts:logout' %}">Logout</a>
+        <div class="pt-4 border-t-2 border-serene-200">
+            <a href="{% url 'accounts:logout' %}" class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition font-medium">
+                 Logout
+            </a>
+        </div>
     </nav>
 </aside>

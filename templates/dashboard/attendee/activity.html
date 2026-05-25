@@ -2,58 +2,72 @@
 {% block title %}My Tickets{% endblock %}
 {% block dashboard_content %}
 
-<h1>My Tickets</h1>
+<div class="p-8">
+    <h1 class="text-4xl font-bold text-serene-900 mb-8">My Tickets</h1>
 
-<h2>Upcoming Events</h2>
-{% for ticket in upcoming_tickets %}
-    <div>
-        <h3>{{ ticket.tier.event.title }}</h3>
-        <p>Date: {{ ticket.tier.event.start_datetime }}</p>
-        <p>Tier: {{ ticket.tier.name }}</p>
-        <p>Status: {{ ticket.get_status_display }}</p>
+    {% if my_tickets %}
+        <div class="space-y-6">
+            {% for ticket in my_tickets %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition border-l-4 border-serene-300">
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            
+                            <!-- Event Info -->
+                            <div class="md:col-span-2">
+                                <div class="flex items-start gap-4 mb-6">
+                                    {% if ticket.tier.event.logo %}
+                                        <img src="{{ ticket.tier.event.logo.url }}" alt="Event logo" class="w-16 h-16 rounded-lg object-cover">
+                                    {% endif %}
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-serene-900 mb-2">{{ ticket.tier.event.title }}</h3>
+                                        <p class="text-serene-600">{{ ticket.tier.name }}</p>
+                                    </div>
+                                </div>
 
-        {% if ticket.qr_code %}
-            <img src="{{ ticket.qr_code.url }}" alt="QR Code">
-        {% endif %}
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-serene-600 font-semibold">Date</p>
+                                        <p class="text-serene-900">{{ ticket.tier.event.start_datetime|date:"M d, Y" }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-serene-600 font-semibold">Time</p>
+                                        <p class="text-serene-900">{{ ticket.tier.event.start_datetime|time:"g:i A" }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-serene-600 font-semibold">Ticket ID</p>
+                                        <p class="text-serene-900 font-mono">{{ ticket.ticket_id }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-serene-600 font-semibold">Status</p>
+                                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Active</span>
+                                    </div>
+                                </div>
+                            </div>
 
-        <a href="{{ ticket.qr_code.url }}" download>Download Ticket</a>
-
-        {% if ticket.status == "confirmed" %}
-            <form method="post" action="{% url 'payments:refund_request' ticket.order.pk %}">
-                {% csrf_token %}
-                <textarea name="reason" placeholder="Reason for refund"></textarea>
-                <button type="submit">Request Refund</button>
-            </form>
-        {% endif %}
-
-        <h4>Networking</h4>
-        <form method="post" action="{% url 'community:networking_optin' ticket.tier.event.pk %}">
-            {% csrf_token %}
-            <label>
-                <input type="checkbox" name="show_linkedin" value="1">
-                Share my LinkedIn with other attendees
-            </label>
-            <button type="submit">Save</button>
-        </form>
-    </div>
-{% empty %}
-    <p>No upcoming tickets. <a href="{% url 'events:list' %}">Browse events</a></p>
-{% endfor %}
-
-<h2>Wishlist</h2>
-{% for item in wishlist %}
-    <div>
-        {% with event=item.event %}
-            {% include "components/event_card.html" %}
-        {% endwith %}
-        <form method="post" action="{% url 'dashboard:wishlist_toggle' %}">
-            {% csrf_token %}
-            <input type="hidden" name="event_id" value="{{ item.event.pk }}">
-            <button type="submit">Remove from Wishlist</button>
-        </form>
-    </div>
-{% empty %}
-    <p>Your wishlist is empty.</p>
-{% endfor %}
+                            <!-- QR Code -->
+                            <div class="flex flex-col items-center justify-center bg-serene-50 rounded-lg p-6">
+                                <div class="mb-4">
+                                    <div class="w-32 h-32 bg-serene-200 rounded-lg flex items-center justify-center">
+                                        <span class="text-serene-600 text-sm text-center">QR Code</span>
+                                    </div>
+                                </div>
+                                <button class="px-4 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 transition font-medium text-sm">
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-serene-50 rounded-xl p-12 text-center">
+            <p class="text-serene-700 text-lg mb-6">No tickets yet. Browse events and get your tickets!</p>
+            <a href="{% url 'events:list' %}" class="inline-block px-8 py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition">
+                Browse Events
+            </a>
+        </div>
+    {% endif %}
+</div>
 
 {% endblock %}

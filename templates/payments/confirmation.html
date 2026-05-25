@@ -1,52 +1,99 @@
 {% extends "base.html" %}
 {% block title %}Confirm Order — {{ event.title }}{% endblock %}
 {% block content %}
-<h1>Confirm Your Order</h1>
-<p>Event: <strong>{{ event.title }}</strong></p>
-<p>Date: {{ event.start_datetime }} to {{ event.end_datetime }}</p>
 
-<table>
-    <thead>
-        <tr><th>Ticket</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
-    </thead>
-    <tbody>
-        {% for item in items %}
-        <tr>
-            <td>{{ item.tier.name }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>₹{{ item.unit_price }}</td>
-            <td>₹{{ item.line_total }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-    <tfoot>
-        <tr><td colspan="3">Subtotal</td><td>₹{{ subtotal }}</td></tr>
-        {% if discount_amount > 0 %}
-        <tr><td colspan="3">Discount{% if discount %} ({{ discount.code }}){% endif %}</td><td>-₹{{ discount_amount }}</td></tr>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <h1 class="text-3xl font-bold text-serene-900 mb-2">Order Summary</h1>
+        <p class="text-serene-600 mb-8">Review and confirm your ticket purchase</p>
+
+        <!-- Event Info -->
+        <div class="bg-serene-50 rounded-lg p-6 mb-8 border-l-4 border-serene-300">
+            <h2 class="text-xl font-bold text-serene-900 mb-2">{{ event.title }}</h2>
+            <p class="text-serene-700">{{ event.start_datetime|date:"F d, Y" }} • {{ event.start_datetime|time:"g:i A" }}</p>
+        </div>
+
+        <!-- Order Table -->
+        <div class="overflow-x-auto mb-8">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-serene-300">
+                        <th class="text-left py-4 px-4 text-serene-900 font-bold">Ticket Type</th>
+                        <th class="text-center py-4 px-4 text-serene-900 font-bold">Quantity</th>
+                        <th class="text-right py-4 px-4 text-serene-900 font-bold">Unit Price</th>
+                        <th class="text-right py-4 px-4 text-serene-900 font-bold">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="border-b border-serene-200 hover:bg-serene-50">
+                        <td class="py-4 px-4 text-serene-900">{{ item.tier.name }}</td>
+                        <td class="py-4 px-4 text-center text-serene-700">{{ item.quantity }}</td>
+                        <td class="py-4 px-4 text-right text-serene-700">₹{{ item.unit_price }}</td>
+                        <td class="py-4 px-4 text-right text-serene-900 font-bold">₹{{ item.line_total }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="bg-serene-50 rounded-lg p-6 mb-8">
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-serene-700">Subtotal</span>
+                    <span class="font-bold text-serene-900">₹{{ subtotal }}</span>
+                </div>
+                {% if discount_amount > 0 %}
+                <div class="flex justify-between text-green-600">
+                    <span>Discount {% if discount %}({{ discount.code }}){% endif %}</span>
+                    <span class="font-bold">-₹{{ discount_amount }}</span>
+                </div>
+                {% endif %}
+                <div class="border-t-2 border-serene-300 pt-3 flex justify-between">
+                    <span class="text-lg font-bold text-serene-900">Total Amount</span>
+                    <span class="text-2xl font-bold text-serene-600">₹{{ total }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discount Error -->
+        {% if discount_error %}
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded mb-8 text-red-700">
+                {{ discount_error }}
+            </div>
         {% endif %}
-        <tr><td colspan="3"><strong>Total</strong></td><td><strong>₹{{ total }}</strong></td></tr>
-    </tfoot>
-</table>
 
-{% if discount_error %}
-    <p style="color: #d00;">{{ discount_error }}</p>
-{% endif %}
+        <!-- Payment Form -->
+        <form id="confirm-form" class="space-y-6">
+            {% csrf_token %}
+            <input type="hidden" name="event_id" value="{{ event.pk }}">
+            <input type="hidden" name="discount_code" value="{{ discount_code }}">
+            {% for item in items %}
+                <input type="hidden" name="tier_{{ item.tier.pk }}" value="{{ item.quantity }}">
+            {% endfor %}
 
-<form id="confirm-form">
-    {% csrf_token %}
-    <input type="hidden" name="event_id" value="{{ event.pk }}">
-    <input type="hidden" name="discount_code" value="{{ discount_code }}">
-    {% for item in items %}
-        <input type="hidden" name="tier_{{ item.tier.pk }}" value="{{ item.quantity }}">
-    {% endfor %}
-    <button type="submit">Pay Now</button>
-</form>
+            <div class="bg-blue-50 border-l-4 border-blue-300 p-4 rounded">
+                <p class="text-blue-800 text-sm">
+                    After payment, you will receive QR code tickets in your dashboard for event check-in and verification.
+                </p>
+            </div>
 
-<p><a href="{% url 'events:detail' event.slug %}">Change ticket selection</a></p>
-<p>After payment, you will receive QR code tickets in your dashboard for event check-in and verification.</p>
-{% endblock %}
+            <button type="submit" class="w-full py-4 bg-serene-300 text-white font-bold text-lg rounded-lg hover:bg-serene-400 transition transform hover:scale-105">
+                Proceed to Payment
+            </button>
+        </form>
 
-{% block scripts %}
+        <!-- Back Link -->
+        <div class="text-center mt-8 pt-8 border-t border-serene-200">
+            <a href="{% url 'events:detail' event.slug %}" class="text-serene-600 hover:text-serene-900 font-medium transition">
+                Back to Event Details
+            </a>
+        </div>
+    </div>
+</div>
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 document.getElementById('confirm-form').addEventListener('submit', async function (e) {
@@ -101,25 +148,24 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 },
-                body: JSON.stringify(response),
+                body: JSON.stringify({
+                    razorpay_order_id: data.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                }),
             });
             const result = await callbackResponse.json();
             if (result.ok) {
                 window.location = result.redirect;
             } else {
-                alert(result.error || 'Payment verification failed.');
+                alert(result.error || 'Payment failed. Please try again.');
             }
         },
-        modal: {
-            ondismiss: function () {
-                alert('Payment process was cancelled. You can try again anytime.');
-            }
-        }
     };
-
-    const razorpay = new Razorpay(options);
-    razorpay.open();
+    new Razorpay(options).open();
 });
 </script>
+
 {% endblock %}

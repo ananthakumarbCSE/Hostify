@@ -1,56 +1,93 @@
 {% extends "dashboard/base_dashboard.html" %}
-{% block title %}Check-in - {{ event.title }}{% endblock %}
+{% block title %}Event Check-in - {{ event.title }}{% endblock %}
 {% block dashboard_content %}
 
-<h1>Check-in: {{ event.title }}</h1>
+<div class="p-8">
+    <h1 class="text-4xl font-bold text-serene-900 mb-2">Event Check-in</h1>
+    <p class="text-serene-600 mb-8">{{ event.title }}</p>
 
-<p>Registered: {{ total_registered }}</p>
-<p>Checked In: <span id="checked-count">{{ total_checked }}</span></p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- QR Scanner -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6">Scan QR Code</h2>
+                
+                <div class="bg-serene-100 rounded-lg p-12 text-center mb-6">
+                    <div id="qr-reader" style="width: 100%;"></div>
+                </div>
 
-<h2>Scan Ticket</h2>
-<input type="text" id="qr-input" placeholder="Enter QR token / scan QR code here">
-<button onclick="scanTicket()">Check In</button>
-<p id="scan-result"></p>
+                <div id="qr-result" class="hidden bg-green-50 border-l-4 border-green-400 p-4 rounded mb-6">
+                    <p class="text-green-800 font-semibold">Ticket Verified</p>
+                    <p id="result-text" class="text-green-700"></p>
+                </div>
 
-<h2>Recent Check-ins</h2>
-<ul id="checkin-feed">
-    {% for ticket in recent_checkins %}
-        <li>{{ ticket.attendee.get_full_name }} — {{ ticket.tier.name }} — {{ ticket.checkin.scanned_at }}</li>
-    {% empty %}
-        <li>No check-ins yet.</li>
-    {% endfor %}
-</ul>
+                <form method="post" id="checkin-form" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" id="qr-data" name="qr_code">
+                    <button type="submit" class="w-full py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition">
+                        Confirm Check-in
+                    </button>
+                </form>
+            </div>
+        </div>
 
-{% endblock %}
+        <!-- Stats Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <p class="text-serene-600 text-sm font-semibold mb-2">Checked In</p>
+                <p class="text-4xl font-bold text-green-600">{{ checked_in_count }}</p>
+            </div>
 
-{% block scripts %}
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <p class="text-serene-600 text-sm font-semibold mb-2">Pending</p>
+                <p class="text-4xl font-bold text-serene-600">{{ pending_count }}</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <p class="text-serene-600 text-sm font-semibold mb-2">Check-in Rate</p>
+                <p class="text-4xl font-bold text-serene-600">{{ checkin_rate }}%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Check-ins -->
+    <div class="bg-white rounded-xl shadow-md p-8 mt-8">
+        <h2 class="text-2xl font-bold text-serene-900 mb-6">Recent Check-ins</h2>
+        
+        <div class="space-y-3">
+            {% for checkin in recent_checkins %}
+                <div class="flex items-center justify-between p-4 bg-serene-50 rounded-lg border-l-4 border-green-400">
+                    <div>
+                        <p class="font-semibold text-serene-900">{{ checkin.user.get_full_name }}</p>
+                        <p class="text-sm text-serene-600">{{ checkin.checked_in_at|time:"g:i A" }}</p>
+                    </div>
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Checked In</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
-function scanTicket() {
-    const token = document.getElementById('qr-input').value.trim();
-    if (!token) return;
-
-    fetch("{% url 'dashboard:checkin_scan' %}", {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
-        body: JSON.stringify({token: token})
-    })
-    .then(r => r.json())
-    .then(data => {
-        const result = document.getElementById('scan-result');
-        if (data.ok) {
-            result.innerText = 'Checked in: ' + data.attendee + ' (' + data.tier + ')';
-            const count = document.getElementById('checked-count');
-            count.innerText = parseInt(count.innerText) + 1;
-
-            const feed = document.getElementById('checkin-feed');
-            const li = document.createElement('li');
-            li.innerText = data.attendee + ' — ' + data.tier + ' — just now';
-            feed.prepend(li);
-        } else {
-            result.innerText = 'Error: ' + data.error;
-        }
-        document.getElementById('qr-input').value = '';
+    const scanner = new Html5QrcodeScanner('qr-reader', {
+        fps: 10,
+        qrbox: 250,
+        rememberLastUsedCamera: true,
     });
-}
+
+    scanner.render((decodedText, decodedResult) => {
+        document.getElementById('qr-data').value = decodedText;
+        document.getElementById('result-text').textContent = 'ID: ' + decodedText;
+        document.getElementById('qr-result').classList.remove('hidden');
+        
+        setTimeout(() => {
+            document.getElementById('checkin-form').submit();
+        }, 1000);
+    }, (error) => {
+        console.log('QR Error:', error);
+    });
 </script>
+
 {% endblock %}

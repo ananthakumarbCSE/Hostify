@@ -1,13 +1,60 @@
 {% extends "base.html" %}
 {% block title %}Payment Successful{% endblock %}
 {% block content %}
-<h1>Payment Successful</h1>
-{% if order %}
-    <p>Thank you! Your payment for ₹{{ order.total }} was completed successfully.</p>
-    <p>Your tickets are now issued and ready in your dashboard.</p>
-    <p><a href="{% url 'dashboard:activity' %}">View My Tickets</a></p>
-{% else %}
-    <p>Thank you! Your payment was completed successfully.</p>
-    <p><a href="{% url 'dashboard:activity' %}">Go to ticket dashboard</a></p>
-{% endif %}
+
+<div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-serene-50 flex items-center justify-center py-12">
+    <div class="max-w-md w-full">
+        
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            
+            <!-- Success Icon -->
+            <div class="bg-gradient-to-r from-green-400 to-green-500 px-8 py-12 text-center">
+                <div class="text-6xl mb-4">✓</div>
+                <h1 class="text-3xl font-bold text-white mb-2">Payment Successful</h1>
+                <p class="text-green-100">Your tickets have been confirmed</p>
+            </div>
+
+            <!-- Details -->
+            <div class="px-8 py-8 space-y-6">
+                
+                <div class="bg-serene-50 rounded-lg p-4">
+                    <p class="text-serene-600 text-sm font-semibold">Order ID</p>
+                    <p class="text-serene-900 font-bold text-lg">{{ order.id }}</p>
+                </div>
+
+                <div class="border-t-2 border-serene-200 pt-6">
+                    <p class="text-serene-600 font-semibold mb-4">What happens next?</p>
+                    <ul class="space-y-3 text-serene-700 text-sm">
+                        <li class="flex items-start">
+                            <span class="text-green-500 font-bold mr-3">1.</span>
+                            <span>Check your email for ticket confirmation</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 font-bold mr-3">2.</span>
+                            <span>Download your QR code tickets</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 font-bold mr-3">3.</span>
+                            <span>Present QR codes at event check-in</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="space-y-3">
+                    <a href="{% url 'dashboard:activity' %}" class="block w-full py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition text-center">
+                        View My Tickets
+                    </a>
+                    <a href="{% url 'events:list' %}" class="block w-full py-3 bg-serene-100 text-serene-700 font-bold rounded-lg hover:bg-serene-200 transition text-center">
+                        Browse More Events
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-serene-600 text-sm">
+            <p>Thank you for choosing EventSphere</p>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
