@@ -45,6 +45,7 @@ class AIGenerationLog(models.Model):
         ("schedule",        "Schedule Builder"),
         ("recommendation",  "Event Recommendation"),
         ("chatbot",         "Chatbot Response"),
+        ("form_autofill",   "Form Autofill"),
     ]
 
     gen_type    = models.CharField(max_length=16, choices=GEN_TYPE)

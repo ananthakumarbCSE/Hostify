@@ -109,6 +109,66 @@ def generate_description_view(request):
 
 @login_required
 @require_POST
+def auto_fill_event_view(request):
+    data        = json.loads(request.body)
+    brief       = data.get("brief", "").strip()
+    event_title = data.get("event_title", "").strip()
+
+    if not brief:
+        return JsonResponse({"error": "No event brief provided."}, status=400)
+
+    title_hint = f' Use this title if it is a good fit: "{event_title}".' if event_title else ""
+    prompt = (
+        'You are an expert event planner and event copywriter. Based on the event brief below, '
+        'suggest values for the Hostify event creation form. Return ONLY valid JSON with the following keys: '
+        'title, category, mode, price_type, status, description, ai_knowledge, start_datetime, end_datetime, '
+        'venue_name, venue_address, venue_city, online_link, chief_guest, total_capacity, ticket_tiers, '
+        'sessions, faqs, sponsors. Use ISO 8601 local datetime strings like "2026-08-25T09:00". '
+        'Use category values exactly: technical, sports, cultural, speech, workshop, music, networking, other. '
+        'Use mode values exactly: online, offline, hybrid. Use price_type values exactly: free, paid. '
+        'Use status values exactly: draft, published, cancelled, completed. '
+        'For boolean fields use true or false, for numeric fields use numbers, and omit file uploads. '
+        'If a value is not present in the brief, return an empty string or a sensible default. '
+        'Do not wrap the JSON in markdown or text.\n\n'
+        f'EVENT BRIEF:{title_hint}\n{brief}'
+    )
+
+    t0 = time.time()
+    response = groq_client.chat.completions.create(
+        model=settings.GROQ_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=900,
+    )
+    latency = int((time.time() - t0) * 1000)
+    raw     = response.choices[0].message.content
+
+    cleaned = raw.strip()
+    if cleaned.startswith('```'):
+        cleaned = cleaned.split('```', 1)[-1].strip()
+    if cleaned.endswith('```'):
+        cleaned = cleaned.rsplit('```', 1)[0].strip()
+
+    start = cleaned.find('{')
+    end   = cleaned.rfind('}')
+    if start != -1 and end != -1:
+        cleaned = cleaned[start:end+1]
+
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        return JsonResponse({
+            "error": "AI response could not be parsed.",
+            "raw": raw,
+        }, status=500)
+
+    _log("form_autofill", brief, raw, response.usage.total_tokens, latency,
+         user=request.user)
+
+    return JsonResponse({"form_data": data})
+
+
+@login_required
+@require_POST
 def schedule_builder_view(request, event_id):
     event    = get_object_or_404(Event, pk=event_id, organizer=request.user)
     data     = json.loads(request.body)

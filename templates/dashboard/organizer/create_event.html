@@ -69,6 +69,13 @@
         {% if form.description.errors %}<span class="error">{{ form.description.errors }}</span>{% endif %}
     </div>
 
+    <h3>AI Autofill All Fields</h3>
+    <div class="form-group">
+        <textarea id="ai-brief" placeholder="Describe your event and what you want filled into the form..." rows="4"></textarea>
+        <button type="button" onclick="autoFillAllFields()">Auto-fill all fields with AI</button>
+        <div id="auto-fill-feedback" class="error"></div>
+    </div>
+
     <h3>AI Description Generator</h3>
     <textarea id="ai-bullets" placeholder="Enter bullet points about your event..."></textarea>
     <button type="button" onclick="generateDescription()">Generate with AI</button>
@@ -112,7 +119,7 @@
     </div>
 
     <h2>Ticket Tiers</h2>
-    <div class="formset-section">
+    <div id="tiers-formset" class="formset-section">
         {{ tier_forms.management_form }}
         {% if tier_forms.non_form_errors %}
             <div class="error">{{ tier_forms.non_form_errors }}</div>
@@ -128,7 +135,7 @@
     </div>
 
     <h2>Sessions / Agenda</h2>
-    <div class="formset-section">
+    <div id="sessions-formset" class="formset-section">
         {{ session_forms.management_form }}
         {% if session_forms.non_form_errors %}
             <div class="error">{{ session_forms.non_form_errors }}</div>
@@ -160,7 +167,7 @@
     </div>
 
     <h2>FAQs (Optional)</h2>
-    <div class="formset-section">
+    <div id="faqs-formset" class="formset-section">
         {{ faq_forms.management_form }}
         {% if faq_forms.non_form_errors %}
             <div class="error">{{ faq_forms.non_form_errors }}</div>
@@ -176,7 +183,7 @@
     </div>
 
     <h2>Sponsors (Optional)</h2>
-    <div class="formset-section">
+    <div id="sponsors-formset" class="formset-section">
         {{ sponsor_forms.management_form }}
         {% if sponsor_forms.non_form_errors %}
             <div class="error">{{ sponsor_forms.non_form_errors }}</div>
@@ -198,6 +205,132 @@
 
 {% block scripts %}
 <script>
+function setFormValue(name, value) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (!el) return;
+    if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = Boolean(value);
+        return;
+    }
+    el.value = value == null ? '' : value;
+}
+
+function ensureFormsetRows(prefix, desiredCount) {
+    const container = document.getElementById(`${prefix}-formset`);
+    if (!container) return;
+    const totalInput = container.querySelector(`[name="${prefix}-TOTAL_FORMS"]`);
+    let currentCount = container.querySelectorAll('.formset-item').length;
+
+    while (currentCount < desiredCount) {
+        const last = container.querySelector('.formset-item:last-of-type');
+        if (!last) break;
+        const clone = last.cloneNode(true);
+        clone.querySelectorAll('input, select, textarea').forEach(el => {
+            if (!el.name) return;
+            const newName = el.name.replace(new RegExp(`^${prefix}-\\d+-`), `${prefix}-${currentCount}-`);
+            const newId = el.id ? el.id.replace(new RegExp(`^id_${prefix}-\\d+-`), `id_${prefix}-${currentCount}-`) : '';
+            el.name = newName;
+            if (el.id) el.id = newId;
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                el.checked = false;
+            } else {
+                el.value = '';
+            }
+            if (el.name.endsWith('-DELETE')) {
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    el.checked = false;
+                } else {
+                    el.value = '';
+                }
+            }
+        });
+        container.appendChild(clone);
+        currentCount += 1;
+    }
+    if (totalInput) {
+        totalInput.value = desiredCount;
+    }
+}
+
+function fillFormset(prefix, items, fields) {
+    if (!Array.isArray(items) || items.length === 0) return;
+    ensureFormsetRows(prefix, items.length);
+    items.forEach((item, index) => {
+        fields.forEach(field => {
+            const name = `${prefix}-${index}-${field}`;
+            const el = document.querySelector(`[name="${name}"]`);
+            if (!el) return;
+            const value = item[field];
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                el.checked = Boolean(value);
+            } else {
+                el.value = value == null ? '' : value;
+            }
+        });
+    });
+}
+
+function autoFillAllFields() {
+    const brief = document.getElementById('ai-brief').value.trim();
+    const title = document.querySelector('[name="title"]').value.trim();
+    const feedback = document.getElementById('auto-fill-feedback');
+    feedback.textContent = '';
+
+    if (!brief) {
+        feedback.textContent = 'Please enter a short event brief first.';
+        return;
+    }
+
+    fetch('/api/ai/auto-fill-event/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify({brief: brief, event_title: title})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            feedback.textContent = data.error || 'AI could not autofill the form.';
+            return;
+        }
+
+        const formData = data.form_data || {};
+        const topLevelFields = [
+            'title', 'category', 'mode', 'price_type', 'status',
+            'description', 'ai_knowledge', 'start_datetime', 'end_datetime',
+            'venue_name', 'venue_address', 'venue_city', 'online_link',
+            'chief_guest', 'total_capacity'
+        ];
+
+        topLevelFields.forEach(field => {
+            setFormValue(field, formData[field]);
+        });
+
+        fillFormset('tiers', formData.ticket_tiers || [], [
+            'name', 'tier_type', 'description', 'price',
+            'early_bird_price', 'early_bird_expires', 'capacity',
+            'max_per_order', 'sale_start', 'sale_end', 'is_active'
+        ]);
+
+        fillFormset('sessions', formData.sessions || [], [
+            'title', 'description', 'speaker', 'start_time',
+            'end_time', 'location', 'order'
+        ]);
+
+        fillFormset('faqs', formData.faqs || [], [
+            'question', 'answer', 'order'
+        ]);
+
+        fillFormset('sponsors', formData.sponsors || [], [
+            'name', 'website', 'tier', 'amount', 'description'
+        ]);
+
+        feedback.textContent = 'AI autofill completed. Review and edit any fields before saving.';
+    })
+    .catch(() => {
+        feedback.textContent = 'AI request failed. Please try again later.';
+    });
+}
+
 function generateDescription() {
     const bullets = document.getElementById('ai-bullets').value;
     const title   = document.querySelector('[name="title"]').value;
