@@ -207,7 +207,13 @@ def _issue_tickets(order):
                 status     = "confirmed",
                 price_paid = item.unit_price,
             )
-            ticket.generate_qr()
+            # Generate QR only for events that are not purely online
+            try:
+                event_mode = order.event.mode
+            except Exception:
+                event_mode = None
+            if event_mode != 'online':
+                ticket.generate_qr()
 
     Notification.objects.create(
         user       = order.user,

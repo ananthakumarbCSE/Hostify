@@ -33,6 +33,22 @@
 
                 <div class="pt-2" style="border-top: 2px solid #E8E3DA;">
                     <p class="font-semibold mb-4" style="color: #1B4332;">What happens next?</p>
+                    {% if order and order.event and order.event.mode == 'online' %}
+                    <ul class="space-y-3 text-sm" style="color: #2C3E35;">
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold mt-0.5" style="color: #40916C;">1.</span>
+                            <span>Check your email for access details and confirmation</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold mt-0.5" style="color: #40916C;">2.</span>
+                            <span>Open the event link from your dashboard when the event starts</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold mt-0.5" style="color: #40916C;">3.</span>
+                            <span>No QR codes are required for online events</span>
+                        </li>
+                    </ul>
+                    {% else %}
                     <ul class="space-y-3 text-sm" style="color: #2C3E35;">
                         <li class="flex items-start gap-3">
                             <span class="font-bold mt-0.5" style="color: #40916C;">1.</span>
@@ -47,6 +63,7 @@
                             <span>Present QR codes at event check-in</span>
                         </li>
                     </ul>
+                    {% endif %}
                 </div>
 
                 <div class="space-y-3">

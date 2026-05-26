@@ -32,10 +32,13 @@ def chatbot_view(request, event_id):
     if not user_msg:
         return JsonResponse({"error": "Empty message."}, status=400)
 
-    try:
-        knowledge = event.ai_knowledge_obj.knowledge
-    except EventAIKnowledge.DoesNotExist:
-        knowledge = event.description
+    if getattr(event, 'ai_knowledge', '').strip():
+        knowledge = event.ai_knowledge
+    else:
+        try:
+            knowledge = event.ai_knowledge_obj.knowledge
+        except EventAIKnowledge.DoesNotExist:
+            knowledge = event.description
 
     system_prompt = (
         f'You are a helpful assistant for the event "{event.title}". '

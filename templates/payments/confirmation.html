@@ -73,9 +73,15 @@
             {% endfor %}
 
             <div class="rounded-lg p-4 border-l-4" style="background: #EFF6FF; border-color: #93C5FD;">
+                {% if event.mode == 'online' %}
+                <p class="text-sm" style="color: #1E40AF;">
+                    After payment, you will find digital access details in your dashboard — no QR codes required for online events.
+                </p>
+                {% else %}
                 <p class="text-sm" style="color: #1E40AF;">
                     After payment, you will receive QR code tickets in your dashboard for event check-in and verification.
                 </p>
+                {% endif %}
             </div>
 
             <button type="submit" class="btn-primary w-full py-4 text-lg">
