@@ -223,7 +223,7 @@
       </div>
     </div>
 
-    <!-- ── SECTION 3 · AI Chatbot Knowledge ──────────────────────── -->
+    <!-- ── SECTION 3 · AI Assistance ─────────────────────────────── -->
     <div class="ai-panel rounded-xl p-8 border" style="background:linear-gradient(135deg,#081C15 0%,#1B4332 60%,#2D6A4F 100%);border-color:#2D6A4F;">
       <div class="flex items-center gap-3 mb-6 pb-5" style="border-bottom:1px solid rgba(255,255,255,0.12);">
         <span class="flex items-center justify-center w-9 h-9 rounded-lg shrink-0" style="background:rgba(212,175,55,0.18);">
@@ -232,14 +232,39 @@
           </svg>
         </span>
         <div>
-          <h2 class="font-display text-xl font-bold text-white">AI Chatbot Knowledge</h2>
-          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.55);">This text trains the chatbot on your event's public page</p>
+          <h2 class="font-display text-xl font-bold text-white">AI Assistance</h2>
+          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.55);">Let AI fill the edit form from a brief description</p>
         </div>
       </div>
-      <label class="block text-sm font-semibold mb-1" style="color:rgba(255,255,255,0.85);">Event Information for AI</label>
-      <p class="text-xs mb-3" style="color:rgba(255,255,255,0.45);">The more detail you provide, the better the chatbot will answer attendee questions.</p>
-      {{ form.ai_knowledge }}
-      {% if form.ai_knowledge.errors %}<p class="text-red-400 text-xs mt-1">{{ form.ai_knowledge.errors|join:", " }}</p>{% endif %}
+
+      <!-- Auto-fill -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold mb-2" style="color:rgba(255,255,255,0.85);">Auto-fill All Fields</label>
+        <textarea id="ai-brief" rows="4"
+          placeholder="e.g. 'A 2-day hybrid event in Bangalore on Aug 25–26, 2026. Keynotes, workshops, networking. 500 seats. Paid event with early bird. Chief guest: Dr. Rao.'"
+          style="display:block;width:100%;padding:10px 14px;border:1.5px solid rgba(255,255,255,0.2);border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font-size:0.875rem;font-family:inherit;resize:vertical;min-height:100px;outline:none;box-sizing:border-box;"
+          onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'"></textarea>
+        <div class="flex items-center gap-3 mt-3">
+          <button type="button" onclick="autoFillAllFields()"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all"
+            style="background:#D4AF37;color:#081C15;"
+            onmouseover="this.style.background='#B8922A'" onmouseout="this.style.background='#D4AF37'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Auto-fill with AI
+          </button>
+          <span id="auto-fill-feedback" class="text-sm" style="color:rgba(255,255,255,0.6);"></span>
+        </div>
+      </div>
+
+      <!-- Chatbot knowledge -->
+      <div>
+        <label class="block text-sm font-semibold mb-1" style="color:rgba(255,255,255,0.85);">Chatbot Knowledge</label>
+        <p class="text-xs mb-3" style="color:rgba(255,255,255,0.45);">This text trains the chatbot on your event's public page</p>
+        {{ form.ai_knowledge }}
+        {% if form.ai_knowledge.errors %}<p class="text-red-400 text-xs mt-1">{{ form.ai_knowledge.errors|join:", " }}</p>{% endif %}
+      </div>
     </div>
 
     <!-- ── SECTION 4 · Event Images (collapsible) ─────────────────── -->
@@ -355,6 +380,11 @@
       </summary>
       <div class="mt-6 pt-6 px-6 pb-6 space-y-4" id="tiers-formset" style="border-top:1.5px solid #E8E3DA;">
         {{ tier_forms.management_form }}
+        <div class="flex justify-end">
+          <button type="button" onclick="addFormsetRow('tiers')" class="btn-outline text-sm px-4 py-2">
+            + Add another ticket tier
+          </button>
+        </div>
         {% if tier_forms.non_form_errors %}<div class="alert-error">{{ tier_forms.non_form_errors }}</div>{% endif %}
         {% for tf in tier_forms %}
           <div class="rounded-xl border p-5 space-y-4" style="background:#F8FBF9;border-color:#B7E4C7;">
@@ -462,6 +492,11 @@
       </summary>
       <div class="mt-6 pt-6 px-6 pb-6 space-y-4" id="sessions-formset" style="border-top:1.5px solid #E8E3DA;">
         {{ session_forms.management_form }}
+        <div class="flex justify-end">
+          <button type="button" onclick="addFormsetRow('sessions')" class="btn-outline text-sm px-4 py-2">
+            + Add another session
+          </button>
+        </div>
         {% if session_forms.non_form_errors %}<div class="alert-error">{{ session_forms.non_form_errors }}</div>{% endif %}
         {% for sf in session_forms %}
           <div class="rounded-xl border p-5 space-y-4" style="background:#F8FBF9;border-color:#B7E4C7;">
@@ -754,5 +789,152 @@
 
   </form>
 </div>
+
+<script>
+async function autoFillAllFields() {
+  const brief = document.getElementById('ai-brief').value.trim();
+  const feedback = document.getElementById('auto-fill-feedback');
+  if (!brief) { feedback.textContent = 'Please enter event details first.'; return; }
+  feedback.textContent = 'Processing…';
+  try {
+    const res = await fetch("{% url 'ai_services:auto_fill_event' %}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value },
+      body: JSON.stringify({ brief })
+    });
+    const json = await res.json();
+    if (!res.ok) { feedback.textContent = json.error || 'Request failed.'; return; }
+    const d = json.form_data || {};
+    const simple = ['title','description','category','mode','price_type','status',
+                    'venue_name','venue_city','venue_address','online_link',
+                    'chief_guest','total_capacity','ai_knowledge'];
+    let filled = 0;
+    for (const key of simple) {
+      if (d[key] !== undefined && d[key] !== '') {
+        const el = document.querySelector('[name="' + key + '"]');
+        if (el) { el.value = d[key]; filled++; }
+      }
+    }
+
+    ['start_datetime','end_datetime'].forEach(key => {
+      if (d[key]) {
+        const el = document.querySelector('[name="' + key + '"]');
+        if (el) {
+          el.value = normalizeDateValue(d[key]);
+          filled++;
+        }
+      }
+    });
+
+    const formsetSpecs = [
+      { prefix: 'tiers', items: d.ticket_tiers || [], fields: ['name','tier_type','description','price','early_bird_price','early_bird_expires','capacity','max_per_order','sale_start','sale_end','is_active'] },
+      { prefix: 'sessions', items: d.sessions || [], fields: ['title','description','speaker','start_time','end_time','location','order'] },
+      { prefix: 'discounts', items: d.discounts || [], fields: ['code','discount_type','value','max_uses','expires_at','is_active'] },
+      { prefix: 'faqs', items: d.faqs || [], fields: ['question','answer','order'] },
+      { prefix: 'sponsors', items: d.sponsors || [], fields: ['name','website','tier','amount','description'] },
+    ];
+
+    for (const spec of formsetSpecs) {
+      filled += fillFormset(spec.prefix, spec.items, spec.fields);
+    }
+
+    feedback.style.color = '#52B788';
+    feedback.textContent = 'Filled ' + filled + ' fields ✓';
+    if (d.venue_name || d.venue_city) document.getElementById('sec-venue').open = true;
+  } catch (err) {
+    feedback.style.color = '#E53E3E';
+    feedback.textContent = err.message || 'Unable to parse AI response.';
+  }
+}
+
+function normalizeDateValue(value) {
+  if (!value) return '';
+  let v = String(value).trim();
+  if (v.includes('T')) return v.substring(0, 16);
+  if (v.includes(' ')) return v.replace(' ', 'T').substring(0, 16);
+  return v;
+}
+
+function getFormsetRows(prefix) {
+  const container = document.getElementById(prefix + '-formset');
+  if (!container) return [];
+  return Array.from(container.children).filter(child => child.matches('.rounded-xl'));
+}
+
+function addFormsetRow(prefix) {
+  const container = document.getElementById(prefix + '-formset');
+  const totalFormsEl = document.querySelector('[name="' + prefix + '-TOTAL_FORMS"]');
+  if (!container || !totalFormsEl) return;
+  const rows = getFormsetRows(prefix);
+  const template = rows[rows.length - 1] || rows[0];
+  if (!template) return;
+  const clone = cloneFormsetRow(prefix, rows.length, template);
+  container.appendChild(clone);
+  totalFormsEl.value = rows.length + 1;
+}
+
+function fillFormset(prefix, items, fields) {
+  if (!items || !items.length) return 0;
+  const rows = getFormsetRows(prefix);
+  const totalFormsEl = document.querySelector('[name="' + prefix + '-TOTAL_FORMS"]');
+  if (!totalFormsEl) return 0;
+  let totalForms = parseInt(totalFormsEl.value, 10) || 0;
+
+  while (rows.length < items.length) {
+    const template = rows[rows.length - 1] || rows[0];
+    if (!template) break;
+    const clone = cloneFormsetRow(prefix, rows.length, template);
+    template.parentElement.appendChild(clone);
+    rows.push(clone);
+    totalForms += 1;
+  }
+
+  totalFormsEl.value = totalForms;
+  let filled = 0;
+
+  items.forEach((item, index) => {
+    if (index >= rows.length) return;
+    const row = rows[index];
+    fields.forEach(key => {
+      if (item[key] === undefined) return;
+      const value = item[key];
+      const field = row.querySelector('[name="' + prefix + '-' + index + '-' + key + '"]');
+      if (!field) return;
+      if (field.type === 'checkbox') {
+        field.checked = Boolean(value);
+      } else {
+        field.value = normalizeDateValue(value);
+      }
+      filled += 1;
+    });
+  });
+
+  return filled;
+}
+
+function cloneFormsetRow(prefix, index, template) {
+  const clone = template.cloneNode(true);
+  clone.querySelectorAll('[name]').forEach(el => {
+    const oldName = el.name;
+    const newName = oldName.replace(new RegExp('^' + prefix + '-\\d+-'), prefix + '-' + index + '-');
+    el.name = newName;
+    if (el.id) {
+      el.id = el.id.replace(new RegExp('^' + prefix + '-\\d+-'), prefix + '-' + index + '-');
+    }
+    if (el.type === 'checkbox' || el.type === 'radio') {
+      el.checked = false;
+    } else {
+      el.value = '';
+    }
+    if (newName.endsWith('-DELETE') || newName.endsWith('-id')) {
+      el.value = '';
+    }
+  });
+  clone.querySelectorAll('label[for]').forEach(label => {
+    label.htmlFor = label.htmlFor.replace(new RegExp('^' + prefix + '-\\d+-'), prefix + '-' + index + '-');
+  });
+  return clone;
+}
+</script>
 
 {% endblock %}

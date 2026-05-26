@@ -112,6 +112,79 @@ def generate_description_view(request):
 
 @login_required
 @require_POST
+def generate_email_draft_view(request, event_id):
+    event = get_object_or_404(Event, pk=event_id, organizer=request.user)
+    data = json.loads(request.body)
+    subject_hint = data.get("subject_hint", "").strip()
+    prompt_text = data.get("prompt", "").strip()
+
+    confirmed_count = Ticket.objects.filter(tier__event=event, status="confirmed").count()
+    start_date = event.start_datetime.strftime("%b %d, %Y %H:%M") if event.start_datetime else "TBA"
+    end_date = event.end_datetime.strftime("%b %d, %Y %H:%M") if event.end_datetime else "TBA"
+    location_lines = []
+    if getattr(event, "venue_name", None):
+        location_lines.append(event.venue_name)
+    if getattr(event, "venue_address", None):
+        location_lines.append(event.venue_address)
+    if getattr(event, "venue_city", None):
+        location_lines.append(event.venue_city)
+    if getattr(event, "online_link", None):
+        location_lines.append(f"Online link: {event.online_link}")
+    location_text = "; ".join(location_lines) if location_lines else "TBA"
+    event_description = (getattr(event, "ai_knowledge", "") or event.description or "")[:1200]
+
+    prompt = (
+        f'You are an expert event marketer and organizer assistant. Create a short email announcement for attendees confirmed for "{event.title}". '
+        'Return only valid JSON with two keys: subject and message. '
+        'Use a professional, friendly tone. Subject should be concise and engaging, and message should include a greeting, thank-you note, key logistics, and any next steps. '
+        'Do not include markdown formatting or extra commentary outside the JSON object. '
+        'Use the event context below and adapt the message for attendees who have already bought tickets.'
+        f'\n\nEVENT DETAILS:\nTitle: {event.title}\nMode: {event.mode}\nDate: {start_date} - {end_date}\nLocation: {location_text}\nTickets confirmed: {confirmed_count}\nDescription: {event_description}\n'
+    )
+    if prompt_text:
+        prompt += f'Additional organizer note: {prompt_text}\n'
+    if subject_hint:
+        prompt += f'Subject hint: {subject_hint}\n'
+
+    t0 = time.time()
+    response = groq_client.chat.completions.create(
+        model=settings.GROQ_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=500,
+    )
+    latency = int((time.time() - t0) * 1000)
+    raw = response.choices[0].message.content
+
+    cleaned = raw.strip()
+    if cleaned.startswith('```'):
+        cleaned = cleaned.split('```', 1)[-1].strip()
+    if cleaned.endswith('```'):
+        cleaned = cleaned.rsplit('```', 1)[0].strip()
+
+    start = cleaned.find('{')
+    end = cleaned.rfind('}')
+    if start != -1 and end != -1:
+        cleaned = cleaned[start:end+1]
+
+    try:
+        result = json.loads(cleaned)
+    except json.JSONDecodeError:
+        return JsonResponse({
+            "error": "AI response could not be parsed.",
+            "raw": raw,
+        }, status=500)
+
+    _log("email_draft", prompt, raw, response.usage.total_tokens, latency,
+         event=event, user=request.user)
+
+    return JsonResponse({
+        "subject": result.get("subject", ""),
+        "message": result.get("message", ""),
+    })
+
+
+@login_required
+@require_POST
 def auto_fill_event_view(request):
     data        = json.loads(request.body)
     brief       = data.get("brief", "").strip()
@@ -126,7 +199,10 @@ def auto_fill_event_view(request):
         'suggest values for the Hostify event creation form. Return ONLY valid JSON with the following keys: '
         'title, category, mode, price_type, status, description, ai_knowledge, start_datetime, end_datetime, '
         'venue_name, venue_address, venue_city, online_link, chief_guest, total_capacity, ticket_tiers, '
-        'sessions, faqs, sponsors. Use ISO 8601 local datetime strings like "2026-08-25T09:00". '
+        'sessions, faqs, sponsors, discounts. Use ISO 8601 local datetime strings like "2026-08-25T09:00". '
+        'For ticket_tiers return an array of objects with name, tier_type, description, price, early_bird_price, '
+        'early_bird_expires, capacity, max_per_order, sale_start, sale_end, and is_active. '
+        'For discounts return an array of objects with code, discount_type, value, max_uses, expires_at, and is_active. '
         'Use category values exactly: technical, sports, cultural, speech, workshop, music, networking, other. '
         'Use mode values exactly: online, offline, hybrid. Use price_type values exactly: free, paid. '
         'Use status values exactly: draft, published, cancelled, completed. '

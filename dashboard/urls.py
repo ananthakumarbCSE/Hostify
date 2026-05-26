@@ -8,6 +8,7 @@ urlpatterns = [
     path("",                                views.redirect_to_events),
     path("events/",                         views.events_view,          name="events"),
     path("events/<int:event_id>/",          views.event_manage_view,    name="event_manage"),
+    path("events/<int:event_id>/send-email/", views.send_event_email_view, name="send_event_email"),
     path("profile/",                        views.profile_view,         name="profile"),
     path("profile/<str:username>/",         views.public_profile_view,  name="public_profile"),
     path("notifications/",                  views.notifications_view,   name="notifications"),

@@ -8,6 +8,8 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Sum, Count, Avg
+from django.urls import reverse
+from django.core.mail import EmailMessage
 from events.models import Event, EventWishlist
 from events.forms import EventForm, EventSessionFormSet,TicketTierFormSet, DiscountCodeFormSet,EventFAQFormSet, EventSponsorFormSet
 from tickets.models import Ticket, CheckIn
@@ -306,6 +308,17 @@ def event_manage_view(request, event_id):
                    .order_by("-submitted_at"))
     avg_feedback= feedbacks.aggregate(avg=Avg("rating"))["avg"]
 
+    # For fully online events, mark all confirmed tickets as checked in automatically.
+    if event.mode == "online":
+        auto_checkin = tickets.filter(checked_in=False)
+        for ticket in auto_checkin:
+            ticket.checked_in = True
+            ticket.save(update_fields=["checked_in"])
+            try:
+                ticket.checkin
+            except CheckIn.DoesNotExist:
+                CheckIn.objects.create(ticket=ticket, scanned_by=None, method="automatic")
+
     total_revenue = (Order.objects
                      .filter(event=event, status="paid")
                      .aggregate(t=Sum("total"))["t"] or 0)
@@ -346,6 +359,55 @@ def checkin_panel_view(request, event_id):
         "total_checked":     checked.count(),
         "recent_checkins":   recent,
     })
+
+
+@login_required
+@require_POST
+def send_event_email_view(request, event_id):
+    event = get_object_or_404(Event, pk=event_id, organizer=request.user)
+    subject = request.POST.get("subject", "").strip()
+    message = request.POST.get("message", "").strip()
+
+    if not subject or not message:
+        messages.error(request, "Please provide both subject and message for the announcement.")
+        return redirect("dashboard:event_manage", event_id=event.pk)
+
+    confirmed_tickets = Ticket.objects.filter(tier__event=event, status="confirmed").select_related("attendee")
+    recipient_emails = sorted({t.attendee.email for t in confirmed_tickets if t.attendee.email})
+
+    if not recipient_emails:
+        messages.error(request, "No confirmed attendees are available to send the email to.")
+        return redirect("dashboard:event_manage", event_id=event.pk)
+
+    # Create site notifications for each confirmed attendee.
+    notified_users = {}
+    for ticket in confirmed_tickets:
+        user = ticket.attendee
+        if user.pk in notified_users:
+            continue
+        notified_users[user.pk] = user
+        Notification.objects.create(
+            user=user,
+            notif_type="announcement",
+            title=f"Organizer announcement for {event.title}",
+            message=message,
+            link=reverse("events:detail", args=[event.slug])
+        )
+
+    email = EmailMessage(
+        subject=subject,
+        body=message,
+        from_email=request.user.email,
+        to=[request.user.email],
+        bcc=recipient_emails,
+    )
+    try:
+        email.send(fail_silently=False)
+        messages.success(request, "Announcement sent to confirmed attendees and notifications created.")
+    except Exception as exc:
+        messages.error(request, f"Email delivery failed: {exc}")
+
+    return redirect("dashboard:event_manage", event_id=event.pk)
 
 
 @login_required

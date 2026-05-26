@@ -78,6 +78,14 @@ class Event(models.Model):
     def is_past(self):
         return self.end_datetime < timezone.now()
 
+    @property
+    def get_min_price(self):
+        if self.price_type == "free":
+            return 0
+        active_tiers = self.ticket_tiers.filter(is_active=True)
+        prices = [tier.current_price() for tier in active_tiers]
+        return min(prices) if prices else 0
+
 class EventSession(models.Model):
     
     event      = models.ForeignKey(Event, on_delete=models.CASCADE,related_name="sessions")

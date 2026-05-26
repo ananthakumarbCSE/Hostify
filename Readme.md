@@ -473,12 +473,6 @@ This project is licensed under the MIT License.
 
 ---
 
-# 👨‍💻 Author
-
-Developed by **Mohamed Meerasha.M**
-
----
-
 # ⭐ Support
 
 If you found this project useful, consider giving it a ⭐ on GitHub.
