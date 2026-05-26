@@ -1,480 +1,819 @@
 {% extends "dashboard/base_dashboard.html" %}
 {% load crispy_forms_tags %}
-{% block title %}Create Event{% endblock %}
+
+{% block title %}Create Event — Hostify{% endblock %}
+{% block dashboard_heading %}Create Event{% endblock %}
+{% block dashboard_subheading %}Fill in the details below to bring your event to life{% endblock %}
+
 {% block dashboard_content %}
 
-<div class="p-8">
-    <h1 class="text-4xl font-bold text-serene-900 mb-2">Create Event</h1>
-    <p class="text-serene-600 mb-8">Fill in the details below to create your event</p>
+<style>
+/* ── Global form widget styles ─────────────────────────────────────────── */
+#create-event-form input[type="text"],
+#create-event-form input[type="number"],
+#create-event-form input[type="email"],
+#create-event-form input[type="url"],
+#create-event-form input[type="date"],
+#create-event-form input[type="time"],
+#create-event-form input[type="datetime-local"],
+#create-event-form input[type="file"],
+#create-event-form select,
+#create-event-form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #B7E4C7;
+  border-radius: 8px;
+  background: #fff;
+  color: #2C3E35;
+  font-size: 0.875rem;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  outline: none;
+}
+#create-event-form input[type="text"]:focus,
+#create-event-form input[type="number"]:focus,
+#create-event-form input[type="email"]:focus,
+#create-event-form input[type="url"]:focus,
+#create-event-form input[type="date"]:focus,
+#create-event-form input[type="time"]:focus,
+#create-event-form input[type="datetime-local"]:focus,
+#create-event-form input[type="file"]:focus,
+#create-event-form select:focus,
+#create-event-form textarea:focus {
+  border-color: #2D6A4F;
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.12);
+}
+#create-event-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24' stroke='%236B7B73' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+#create-event-form textarea { resize: vertical; min-height: 100px; }
+#create-event-form input[type="file"] {
+  padding: 8px 12px;
+  cursor: pointer;
+  background: #F8FBF9;
+}
+#create-event-form input[type="file"]::-webkit-file-upload-button {
+  background: #1B4332;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-right: 10px;
+}
+.ai-panel input[type="text"],
+.ai-panel input[type="number"],
+.ai-panel input[type="url"],
+.ai-panel textarea,
+.ai-panel select {
+  background: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  color: #fff !important;
+}
+.ai-panel input:focus,
+.ai-panel textarea:focus,
+.ai-panel select:focus {
+  border-color: #D4AF37 !important;
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.15) !important;
+}
+#create-event-form input[type="checkbox"] {
+  width: auto;
+  display: inline-block;
+  margin-right: 6px;
+  accent-color: #2D6A4F;
+}
+/* Formset row delete checkbox label */
+.delete-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #b91c1c;
+  cursor: pointer;
+}
+/* Hidden management inputs */
+#create-event-form input[name$="-ORDER"],
+#create-event-form input[name$="-id"] {
+  display: none;
+}
+</style>
 
-    {% if messages %}
-        <div class="mb-8">
-            {% for message in messages %}
-                <div class="rounded-lg p-4 mb-4 border-l-4 
-                    {% if message.tags == 'error' %}bg-red-50 border-red-400 text-red-800
-                    {% elif message.tags == 'success' %}bg-green-50 border-green-400 text-green-800
-                    {% else %}bg-serene-50 border-serene-400 text-serene-800{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+<div class="page-fade-in max-w-4xl mx-auto pb-16">
+
+  {% if messages %}
+    <div class="mb-8 space-y-3">
+      {% for message in messages %}
+        <div class="alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6" id="create-event-form">
+    {% csrf_token %}
+
+    <!-- ── SECTION 1 · Basic Information ─────────────────────────── -->
+    <div class="card">
+      <div class="flex items-center gap-3 mb-6 pb-5 divider">
+        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
+          </svg>
+        </span>
+        <div>
+          <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Basic Information</h2>
+          <p class="text-xs mt-0.5" style="color:#6B7B73;">Core details about your event</p>
         </div>
-    {% endif %}
+      </div>
 
-    <form method="post" enctype="multipart/form-data" class="space-y-8">
-        {% csrf_token %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="md:col-span-2">
+          <label class="field-label">Event Title</label>
+          {{ form.title }}
+          {% if form.title.errors %}<p class="text-red-600 text-xs mt-1">{{ form.title.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Category</label>
+          {{ form.category }}
+          {% if form.category.errors %}<p class="text-red-600 text-xs mt-1">{{ form.category.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Event Mode</label>
+          {{ form.mode }}
+          {% if form.mode.errors %}<p class="text-red-600 text-xs mt-1">{{ form.mode.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Price Type</label>
+          {{ form.price_type }}
+          {% if form.price_type.errors %}<p class="text-red-600 text-xs mt-1">{{ form.price_type.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Event Status</label>
+          {{ form.status }}
+          {% if form.status.errors %}<p class="text-red-600 text-xs mt-1">{{ form.status.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Start Date &amp; Time</label>
+          {{ form.start_datetime }}
+          {% if form.start_datetime.errors %}<p class="text-red-600 text-xs mt-1">{{ form.start_datetime.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">End Date &amp; Time</label>
+          {{ form.end_datetime }}
+          {% if form.end_datetime.errors %}<p class="text-red-600 text-xs mt-1">{{ form.end_datetime.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Chief Guest <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+          {{ form.chief_guest }}
+          {% if form.chief_guest.errors %}<p class="text-red-600 text-xs mt-1">{{ form.chief_guest.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Total Capacity</label>
+          {{ form.total_capacity }}
+          {% if form.total_capacity.errors %}<p class="text-red-600 text-xs mt-1">{{ form.total_capacity.errors|join:", " }}</p>{% endif %}
+        </div>
+      </div>
+    </div>
 
-        <style>
-            form input[type="text"],
-            form input[type="number"],
-            form input[type="email"],
-            form input[type="url"],
-            form input[type="date"],
-            form input[type="time"],
-            form input[type="datetime-local"],
-            form input[type="file"],
-            form select,
-            form textarea {
-                width: 100%;
-                padding: 12px 16px;
-                border: 2px solid #0077b6;
-                border-radius: 8px;
-                outline: none;
-                background-color: #ffffff;
-                color: #001d3d;
-                font-size: 14px;
-                transition: all 0.3s;
-                box-sizing: border-box;
-            }
-            form input[type="text"]:focus,
-            form input[type="number"]:focus,
-            form input[type="email"]:focus,
-            form input[type="url"]:focus,
-            form input[type="date"]:focus,
-            form input[type="time"]:focus,
-            form input[type="datetime-local"]:focus,
-            form input[type="file"]:focus,
-            form select:focus,
-            form textarea:focus {
-                border-color: #219ebc;
-                background-color: #f0f8ff;
-                box-shadow: 0 0 0 3px rgba(33, 158, 188, 0.1);
-            }
-            form textarea {
-                resize: vertical;
-                min-height: 100px;
-            }
-        </style>
+    <!-- ── SECTION 2 · Description ────────────────────────────────── -->
+    <div class="card">
+      <div class="flex items-center gap-3 mb-6 pb-5 divider">
+        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
+          </svg>
+        </span>
+        <div>
+          <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Description</h2>
+          <p class="text-xs mt-0.5" style="color:#6B7B73;">Tell attendees what your event is about</p>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Event Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}<p class="text-red-600 text-xs mt-1">{{ form.description.errors|join:", " }}</p>{% endif %}
+      </div>
 
-        <!-- Basic Information -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Basic Information</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
-                    <label class="block text-serene-900 font-semibold mb-2">Event Title</label>
-                    {{ form.title }}
-                    {% if form.title.errors %}<span class="text-red-600 text-sm">{{ form.title.errors }}</span>{% endif %}
-                </div>
+      <!-- AI quick description helper -->
+      <div class="mt-5 rounded-xl p-5 border border-dashed" style="background:#F0FAF4;border-color:#52B788;">
+        <div class="flex items-center gap-2 mb-3">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <span class="text-sm font-semibold" style="color:#1B4332;">Quick AI Description</span>
+        </div>
+        <textarea id="desc-bullets" rows="3"
+          placeholder="Paste bullet points and let AI craft your description…"
+          style="display:block;width:100%;padding:10px 14px;border:1.5px solid #B7E4C7;border-radius:8px;background:#fff;color:#2C3E35;font-size:0.875rem;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;"
+          onfocus="this.style.borderColor='#2D6A4F'" onblur="this.style.borderColor='#B7E4C7'"></textarea>
+        <div class="flex items-center gap-3 mt-3">
+          <button type="button" onclick="generateDescription()" class="btn-primary text-sm py-2 px-4">Generate Description</button>
+          <span id="desc-feedback" class="text-sm" style="color:#6B7B73;"></span>
+        </div>
+      </div>
+    </div>
 
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Category</label>
-                    {{ form.category }}
-                    {% if form.category.errors %}<span class="text-red-600 text-sm">{{ form.category.errors }}</span>{% endif %}
-                </div>
+    <!-- ── SECTION 3 · AI Assistance ──────────────────────────────── -->
+    <div class="ai-panel rounded-xl p-8 border" style="background:linear-gradient(135deg,#081C15 0%,#1B4332 60%,#2D6A4F 100%);border-color:#2D6A4F;">
+      <div class="flex items-center gap-3 mb-6 pb-5" style="border-bottom:1px solid rgba(255,255,255,0.12);">
+        <span class="flex items-center justify-center w-9 h-9 rounded-lg shrink-0" style="background:rgba(212,175,55,0.18);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </span>
+        <div>
+          <h2 class="font-display text-xl font-bold text-white">AI Assistance</h2>
+          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.55);">Let AI fill the form from a brief description</p>
+        </div>
+      </div>
 
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Event Mode</label>
-                    {{ form.mode }}
-                    {% if form.mode.errors %}<span class="text-red-600 text-sm">{{ form.mode.errors }}</span>{% endif %}
-                </div>
+      <!-- Auto-fill -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold mb-2" style="color:rgba(255,255,255,0.85);">Auto-fill All Fields</label>
+        <textarea id="ai-brief" rows="4"
+          placeholder="e.g. 'A 2-day tech conference in Bangalore on Aug 25–26, 2026. Keynotes, workshops, networking. 500 seats. Free entry. Chief guest: Dr. Rao.'"
+          style="display:block;width:100%;padding:10px 14px;border:1.5px solid rgba(255,255,255,0.2);border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font-size:0.875rem;font-family:inherit;resize:vertical;min-height:100px;outline:none;box-sizing:border-box;"
+          onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'"></textarea>
+        <div class="flex items-center gap-3 mt-3">
+          <button type="button" onclick="autoFillAllFields()"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all"
+            style="background:#D4AF37;color:#081C15;"
+            onmouseover="this.style.background='#B8922A'" onmouseout="this.style.background='#D4AF37'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Auto-fill with AI
+          </button>
+          <span id="auto-fill-feedback" class="text-sm" style="color:rgba(255,255,255,0.6);"></span>
+        </div>
+      </div>
 
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Price Type</label>
-                    {{ form.price_type }}
-                    {% if form.price_type.errors %}<span class="text-red-600 text-sm">{{ form.price_type.errors }}</span>{% endif %}
-                </div>
+      <!-- Chatbot knowledge -->
+      <div>
+        <label class="block text-sm font-semibold mb-1" style="color:rgba(255,255,255,0.85);">Chatbot Knowledge</label>
+        <p class="text-xs mb-2" style="color:rgba(255,255,255,0.45);">This text trains the AI chatbot for your event's public page.</p>
+        {{ form.ai_knowledge }}
+        {% if form.ai_knowledge.errors %}<p class="text-red-400 text-xs mt-1">{{ form.ai_knowledge.errors|join:", " }}</p>{% endif %}
+      </div>
+    </div>
 
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Event Status</label>
-                    {{ form.status }}
-                    {% if form.status.errors %}<span class="text-red-600 text-sm">{{ form.status.errors }}</span>{% endif %}
-                </div>
+    <!-- ── SECTION 4 · Event Images (collapsible) ─────────────────── -->
+    <details class="card group" id="sec-images" style="overflow:hidden;padding:0;">
+      <summary class="flex items-center justify-between cursor-pointer select-none p-6 rounded-xl hover:bg-forest-50 transition-colors" style="list-style:none;">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Event Images</h2>
+            <p class="text-xs mt-0.5" style="color:#6B7B73;">Logo &amp; banner uploads</p>
+          </div>
+        </div>
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180 shrink-0" style="color:#6B7B73;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+      <div class="mt-6 pt-6 px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-top:1.5px solid #E8E3DA;">
+        <div>
+          <label class="field-label">Logo <span class="font-normal normal-case" style="color:#6B7B73;">(1:1 · 500×500px)</span></label>
+          {{ form.logo }}
+          {% if form.logo.errors %}<p class="text-red-600 text-xs mt-1">{{ form.logo.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">Banner <span class="font-normal normal-case" style="color:#6B7B73;">(16:9 · 1280×720px)</span></label>
+          {{ form.banner }}
+          {% if form.banner.errors %}<p class="text-red-600 text-xs mt-1">{{ form.banner.errors|join:", " }}</p>{% endif %}
+        </div>
+      </div>
+    </details>
 
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Start Date & Time</label>
-                    {{ form.start_datetime }}
-                    {% if form.start_datetime.errors %}<span class="text-red-600 text-sm">{{ form.start_datetime.errors }}</span>{% endif %}
-                </div>
+    <!-- ── SECTION 5 · Venue (collapsible) ───────────────────────── -->
+    <details class="card group" id="sec-venue" style="overflow:hidden;padding:0;">
+      <summary class="flex items-center justify-between cursor-pointer select-none p-6 rounded-xl hover:bg-forest-50 transition-colors" style="list-style:none;">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Venue Information</h2>
+            <p class="text-xs mt-0.5" style="color:#6B7B73;">Where will it take place?</p>
+          </div>
+        </div>
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180 shrink-0" style="color:#6B7B73;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+      <div class="mt-6 pt-6 px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-top:1.5px solid #E8E3DA;">
+        <div>
+          <label class="field-label">Venue Name</label>
+          {{ form.venue_name }}
+          {% if form.venue_name.errors %}<p class="text-red-600 text-xs mt-1">{{ form.venue_name.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="field-label">City</label>
+          {{ form.venue_city }}
+          {% if form.venue_city.errors %}<p class="text-red-600 text-xs mt-1">{{ form.venue_city.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div class="md:col-span-2">
+          <label class="field-label">Address</label>
+          {{ form.venue_address }}
+          {% if form.venue_address.errors %}<p class="text-red-600 text-xs mt-1">{{ form.venue_address.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div class="md:col-span-2">
+          <label class="field-label">Online Link <span class="font-normal normal-case" style="color:#6B7B73;">(for virtual/hybrid events)</span></label>
+          {{ form.online_link }}
+          {% if form.online_link.errors %}<p class="text-red-600 text-xs mt-1">{{ form.online_link.errors|join:", " }}</p>{% endif %}
+        </div>
+      </div>
+    </details>
 
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">End Date & Time</label>
-                    {{ form.end_datetime }}
-                    {% if form.end_datetime.errors %}<span class="text-red-600 text-sm">{{ form.end_datetime.errors }}</span>{% endif %}
-                </div>
-
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Chief Guest (Optional)</label>
-                    {{ form.chief_guest }}
-                    {% if form.chief_guest.errors %}<span class="text-red-600 text-sm">{{ form.chief_guest.errors }}</span>{% endif %}
-                </div>
-
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Total Capacity</label>
-                    {{ form.total_capacity }}
-                    {% if form.total_capacity.errors %}<span class="text-red-600 text-sm">{{ form.total_capacity.errors }}</span>{% endif %}
-                </div>
+    <!-- ── SECTION 6 · Ticket Tiers (collapsible) ────────────────── -->
+<details class="card group" id="sec-tiers" style="overflow:hidden;padding:0;">
+      <summary class="flex items-center justify-between cursor-pointer select-none p-6 rounded-xl hover:bg-forest-50 transition-colors" style="list-style:none;">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Ticket Tiers</h2>
+            <p class="text-xs mt-0.5" style="color:#6B7B73;">Define pricing &amp; availability tiers</p>
+          </div>
+        </div>
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180 shrink-0" style="color:#6B7B73;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+      <div class="mt-6 pt-6 px-6 pb-6 space-y-4" id="tiers-formset" style="border-top:1.5px solid #E8E3DA;">
+        {{ tier_forms.management_form }}
+        {% if tier_forms.non_form_errors %}<div class="alert-error">{{ tier_forms.non_form_errors }}</div>{% endif %}
+        {% for tf in tier_forms %}
+          <div class="rounded-xl border p-5 space-y-4" style="background:#F8FBF9;border-color:#B7E4C7;">
+            {{ tf.id }}
+            {% if tf.non_field_errors %}<div class="text-red-600 text-sm">{{ tf.non_field_errors }}</div>{% endif %}
+            <!-- Row 1: name + tier_type -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Tier Name</label>
+                {{ tf.name }}
+                {% if tf.name.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.name.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Tier Type</label>
+                {{ tf.tier_type }}
+                {% if tf.tier_type.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.tier_type.errors|join:", " }}</p>{% endif %}
+              </div>
             </div>
-        </div>
-
-        <!-- Description -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Description</h2>
-            
+            <!-- Description -->
             <div>
-                <label class="block text-serene-900 font-semibold mb-2">Event Description</label>
-                {{ form.description }}
-                {% if form.description.errors %}<span class="text-red-600 text-sm">{{ form.description.errors }}</span>{% endif %}
+              <label class="field-label">Description <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+              {{ tf.description }}
+              {% if tf.description.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.description.errors|join:", " }}</p>{% endif %}
             </div>
+            <!-- Row 2: price + early bird price -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Price (₹)</label>
+                {{ tf.price }}
+                {% if tf.price.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.price.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Early Bird Price <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ tf.early_bird_price }}
+                {% if tf.early_bird_price.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.early_bird_price.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <!-- Row 3: early bird expiry + capacity + max per order -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="field-label">Early Bird Expires</label>
+                {{ tf.early_bird_expires }}
+                {% if tf.early_bird_expires.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.early_bird_expires.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Capacity</label>
+                {{ tf.capacity }}
+                {% if tf.capacity.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.capacity.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Max per Order</label>
+                {{ tf.max_per_order }}
+                {% if tf.max_per_order.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.max_per_order.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <!-- Row 4: sale start + sale end -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Sale Start</label>
+                {{ tf.sale_start }}
+                {% if tf.sale_start.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.sale_start.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Sale End</label>
+                {{ tf.sale_end }}
+                {% if tf.sale_end.errors %}<p class="text-red-600 text-xs mt-1">{{ tf.sale_end.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <!-- is_active + delete -->
+            <div class="flex items-center justify-between pt-1">
+              <label class="inline-flex items-center gap-2 text-sm font-medium cursor-pointer" style="color:#2C3E35;">
+                {{ tf.is_active }}
+                Active tier
+              </label>
+              {% if tf.instance.pk %}
+                <label class="delete-row-label">
+                  {{ tf.DELETE }}
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Delete this tier
+                </label>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </details>
+
+    <!-- ── SECTION 7 · Sessions (collapsible) ────────────────────── -->
+<details class="card group" id="sec-sessions" style="overflow:hidden;padding:0;">
+      <summary class="flex items-center justify-between cursor-pointer select-none p-6 rounded-xl hover:bg-forest-50 transition-colors" style="list-style:none;">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Agenda / Sessions</h2>
+            <p class="text-xs mt-0.5" style="color:#6B7B73;">Schedule individual sessions or talks</p>
+          </div>
         </div>
-
-        <!-- AI Assistance -->
-        <div class="bg-gradient-to-r from-serene-50 to-serene-100 rounded-xl shadow-md p-8 border-l-4 border-serene-300">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">AI Assistance</h2>
-            <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded text-blue-800 text-sm" id="autofill-debug" style="display:none;"></div>
-            
-            <div class="mb-6">
-                <label class="block text-serene-900 font-semibold mb-2">Auto-fill All Fields</label>
-                <textarea id="ai-brief" placeholder="Describe your event and what you want filled into the form..." rows="4" 
-                    class="w-full px-4 py-3 border-2 border-serene-400 rounded-lg focus:outline-none focus:border-serene-600 bg-white text-serene-900"></textarea>
-                <button type="button" onclick="autoFillAllFields()" class="mt-3 px-6 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 transition font-medium">
-                    Auto-fill with AI
-                </button>
-                <div id="auto-fill-feedback" class="mt-2 text-red-600 text-sm"></div>
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180 shrink-0" style="color:#6B7B73;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+      <div class="mt-6 pt-6 px-6 pb-6 space-y-4" id="sessions-formset" style="border-top:1.5px solid #E8E3DA;">
+        {{ session_forms.management_form }}
+        {% if session_forms.non_form_errors %}<div class="alert-error">{{ session_forms.non_form_errors }}</div>{% endif %}
+        {% for sf in session_forms %}
+          <div class="rounded-xl border p-5 space-y-4" style="background:#F8FBF9;border-color:#B7E4C7;">
+            {{ sf.id }}
+            {% if sf.non_field_errors %}<div class="text-red-600 text-sm">{{ sf.non_field_errors }}</div>{% endif %}
+            <!-- Row 1: title + speaker -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Session Title</label>
+                {{ sf.title }}
+                {% if sf.title.errors %}<p class="text-red-600 text-xs mt-1">{{ sf.title.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Speaker <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ sf.speaker }}
+                {% if sf.speaker.errors %}<p class="text-red-600 text-xs mt-1">{{ sf.speaker.errors|join:", " }}</p>{% endif %}
+              </div>
             </div>
-
+            <!-- Description -->
             <div>
-                <label class="block text-serene-900 font-semibold mb-2">Chatbot Knowledge</label>
-                {{ form.ai_knowledge }}
-                {% if form.ai_knowledge.errors %}<span class="text-red-600 text-sm">{{ form.ai_knowledge.errors }}</span>{% endif %}
+              <label class="field-label">Description <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+              {{ sf.description }}
+              {% if sf.description.errors %}<p class="text-red-600 text-xs mt-1">{{ sf.description.errors|join:", " }}</p>{% endif %}
             </div>
+            <!-- Row 2: start_time + end_time + location + order -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Start Time</label>
+                {{ sf.start_time }}
+                {% if sf.start_time.errors %}<p class="text-red-600 text-xs mt-1">{{ sf.start_time.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">End Time</label>
+                {{ sf.end_time }}
+                {% if sf.end_time.errors %}<p class="text-red-600 text-xs mt-1">{{ sf.end_time.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Location / Room <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ sf.location }}
+                {% if sf.location.errors %}<p class="text-red-600 text-xs mt-1">{{ sf.location.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Order</label>
+                {{ sf.order }}
+                {% if sf.order.errors %}<p class="text-red-600 text-xs mt-1">{{ sf.order.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <!-- delete -->
+            {% if sf.instance.pk %}
+              <div class="flex justify-end pt-1">
+                <label class="delete-row-label">
+                  {{ sf.DELETE }}
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Delete this session
+                </label>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </details>
+
+    <!-- ── SECTION 8 · Discount Codes (collapsible) ───────────────── -->
+<details class="card group" id="sec-discounts" style="overflow:hidden;padding:0;">
+      <summary class="flex items-center justify-between cursor-pointer select-none p-6 rounded-xl hover:bg-forest-50 transition-colors" style="list-style:none;">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M17 17h.01M7 7l10 10M7 17L17 7M3.93 3.93A9.5 9.5 0 1120.07 20.07"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Discount Codes <span class="font-normal text-base normal-case" style="color:#6B7B73;">(optional)</span></h2>
+            <p class="text-xs mt-0.5" style="color:#6B7B73;">Promo codes for early birds or partners</p>
+          </div>
         </div>
-
-        <!-- Images (Collapsible) -->
-        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
-            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Event Images</h2>
-                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Event Images</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Logo (1:1 Aspect Ratio)</label>
-                    {{ form.logo }}
-                    {% if form.logo.errors %}<span class="text-red-600 text-sm">{{ form.logo.errors }}</span>{% endif %}
-                    <p class="text-serene-600 text-sm mt-2">Recommended: 500x500px</p>
-                </div>
-                
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Banner (16:9 Aspect Ratio)</label>
-                    {{ form.banner }}
-                    {% if form.banner.errors %}<span class="text-red-600 text-sm">{{ form.banner.errors }}</span>{% endif %}
-                    <p class="text-serene-600 text-sm mt-2">Recommended: 1280x720px</p>
-                </div>
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180 shrink-0" style="color:#6B7B73;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+      <div class="mt-6 pt-6 px-6 pb-6 space-y-4" style="border-top:1.5px solid #E8E3DA;">
+        {{ discount_forms.management_form }}
+        {% if discount_forms.non_form_errors %}<div class="alert-error">{{ discount_forms.non_form_errors }}</div>{% endif %}
+        {% for df in discount_forms %}
+          <div class="rounded-xl border p-5 space-y-4" style="background:#F8FBF9;border-color:#B7E4C7;">
+            {{ df.id }}
+            {% if df.non_field_errors %}<div class="text-red-600 text-sm">{{ df.non_field_errors }}</div>{% endif %}
+            <!-- Row 1: code + discount_type + value -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="field-label">Code</label>
+                {{ df.code }}
+                {% if df.code.errors %}<p class="text-red-600 text-xs mt-1">{{ df.code.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Discount Type</label>
+                {{ df.discount_type }}
+                {% if df.discount_type.errors %}<p class="text-red-600 text-xs mt-1">{{ df.discount_type.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Value</label>
+                {{ df.value }}
+                {% if df.value.errors %}<p class="text-red-600 text-xs mt-1">{{ df.value.errors|join:", " }}</p>{% endif %}
+              </div>
             </div>
+            <!-- Row 2: max_uses + expires_at -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Max Uses <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ df.max_uses }}
+                {% if df.max_uses.errors %}<p class="text-red-600 text-xs mt-1">{{ df.max_uses.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Expires At <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ df.expires_at }}
+                {% if df.expires_at.errors %}<p class="text-red-600 text-xs mt-1">{{ df.expires_at.errors|join:", " }}</p>{% endif %}
+              </div>
             </div>
-        </details>
-
-        <!-- Venue Information (Collapsible) -->
-        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
-            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Venue Information</h2>
-                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Venue Information</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">Venue Name</label>
-                    {{ form.venue_name }}
-                    {% if form.venue_name.errors %}<span class="text-red-600 text-sm">{{ form.venue_name.errors }}</span>{% endif %}
-                </div>
-
-                <div>
-                    <label class="block text-serene-900 font-semibold mb-2">City</label>
-                    {{ form.venue_city }}
-                    {% if form.venue_city.errors %}<span class="text-red-600 text-sm">{{ form.venue_city.errors }}</span>{% endif %}
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-serene-900 font-semibold mb-2">Address</label>
-                    {{ form.venue_address }}
-                    {% if form.venue_address.errors %}<span class="text-red-600 text-sm">{{ form.venue_address.errors }}</span>{% endif %}
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-serene-900 font-semibold mb-2">Online Link (for virtual events)</label>
-                    {{ form.online_link }}
-                    {% if form.online_link.errors %}<span class="text-red-600 text-sm">{{ form.online_link.errors }}</span>{% endif %}
-                </div>
+            <!-- is_active + delete -->
+            <div class="flex items-center justify-between pt-1">
+              <label class="inline-flex items-center gap-2 text-sm font-medium cursor-pointer" style="color:#2C3E35;">
+                {{ df.is_active }}
+                Active
+              </label>
+              {% if df.instance.pk %}
+                <label class="delete-row-label">
+                  {{ df.DELETE }}
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Delete this code
+                </label>
+              {% endif %}
             </div>
-            </div>
-        </details>
+          </div>
+        {% endfor %}
+      </div>
+    </details>
 
-        <!-- Ticket Tiers (Collapsible) -->
-        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
-            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Ticket Tiers</h2>
-                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Ticket Tiers</h2>
-                
-                <div id="tiers-formset" class="space-y-6">
-                    {{ tier_forms.management_form }}
-                    {% if tier_forms.non_form_errors %}
-                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ tier_forms.non_form_errors }}</div>
-                    {% endif %}
-                    {% for tf in tier_forms %}
-                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                            {% if tf.non_field_errors %}
-                                <div class="text-red-600 text-sm mb-4">{{ tf.non_field_errors }}</div>
-                            {% endif %}
-                            {{ tf.as_p }}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </details>
-
-        <!-- Sessions / Agenda (Collapsible) -->
-        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
-            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Agenda / Sessions</h2>
-                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Agenda / Sessions</h2>
-                
-                <div id="sessions-formset" class="space-y-6">
-                {{ session_forms.management_form }}
-                {% if session_forms.non_form_errors %}
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ session_forms.non_form_errors }}</div>
-                {% endif %}
-                {% for sf in session_forms %}
-                    <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                        {% if sf.non_field_errors %}
-                            <div class="text-red-600 text-sm mb-4">{{ sf.non_field_errors }}</div>
-                        {% endif %}
-                        {{ sf.as_p }}
-                    </div>
-                {% endfor %}
-            </div>
-            </div>
-        </details>
-
-        <!-- Discount Codes (Collapsible) -->
-        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
-            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Discount Codes (Optional)</h2>
-                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Discount Codes (Optional)</h2>
-                
-                <div class="formset-section space-y-6">
-                    {{ discount_forms.management_form }}
-                    {% if discount_forms.non_form_errors %}
-                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ discount_forms.non_form_errors }}</div>
-                    {% endif %}
-                    {% for df in discount_forms %}
-                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                            {% if df.non_field_errors %}
-                                <div class="text-red-600 text-sm mb-4">{{ df.non_field_errors }}</div>
-                            {% endif %}
-                            {{ df.as_p }}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </details>
-
-        <!-- FAQs (Collapsible) -->
-        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
-            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">FAQs (Optional)</h2>
-                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">FAQs (Optional)</h2>
-                
-                <div id="faqs-formset" class="space-y-6">
-                    {{ faq_forms.management_form }}
-                    {% if faq_forms.non_form_errors %}
-                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ faq_forms.non_form_errors }}</div>
-                    {% endif %}
-                    {% for faq_f in faq_forms %}
-                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                            {% if faq_f.non_field_errors %}
-                                <div class="text-red-600 text-sm mb-4">{{ faq_f.non_field_errors }}</div>
-                            {% endif %}
-                            {{ faq_f.as_p }}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </details>
-
-        <!-- Sponsors (Collapsible) -->
-        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
-            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Sponsors (Optional)</h2>
-                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Sponsors (Optional)</h2>
-                
-                <div id="sponsors-formset" class="space-y-6">
-                    {{ sponsor_forms.management_form }}
-                    {% if sponsor_forms.non_form_errors %}
-                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ sponsor_forms.non_form_errors }}</div>
-                    {% endif %}
-                    {% for spf in sponsor_forms %}
-                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                            {% if spf.non_field_errors %}
-                                <div class="text-red-600 text-sm mb-4">{{ spf.non_field_errors }}</div>
-                            {% endif %}
-                            {{ spf.as_p }}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </details>
-
-        <!-- Submit Buttons -->
-        <div class="flex gap-4 pb-8">
-            <button type="submit" class="px-8 py-4 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition transform hover:scale-105">
-                Create Event
-            </button>
-            <a href="{% url 'dashboard:events' %}" class="px-8 py-4 bg-serene-100 text-serene-700 font-bold rounded-lg hover:bg-serene-200 transition">
-                Cancel
-            </a>
+    <!-- ── SECTION 9 · FAQs (collapsible) ────────────────────────── -->
+<details class="card group" id="sec-faqs" style="overflow:hidden;padding:0;">
+      <summary class="flex items-center justify-between cursor-pointer select-none p-6 rounded-xl hover:bg-forest-50 transition-colors" style="list-style:none;">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="font-display text-xl font-bold" style="color:#1B4332;">FAQs <span class="font-normal text-base normal-case" style="color:#6B7B73;">(optional)</span></h2>
+            <p class="text-xs mt-0.5" style="color:#6B7B73;">Pre-answer common attendee questions</p>
+          </div>
         </div>
-    </form>
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180 shrink-0" style="color:#6B7B73;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+      <div class="mt-6 pt-6 px-6 pb-6 space-y-4" id="faqs-formset" style="border-top:1.5px solid #E8E3DA;">
+        {{ faq_forms.management_form }}
+        {% if faq_forms.non_form_errors %}<div class="alert-error">{{ faq_forms.non_form_errors }}</div>{% endif %}
+        {% for faq_f in faq_forms %}
+          <div class="rounded-xl border p-5 space-y-4" style="background:#F8FBF9;border-color:#B7E4C7;">
+            {{ faq_f.id }}
+            {% if faq_f.non_field_errors %}<div class="text-red-600 text-sm">{{ faq_f.non_field_errors }}</div>{% endif %}
+            <div>
+              <label class="field-label">Question</label>
+              {{ faq_f.question }}
+              {% if faq_f.question.errors %}<p class="text-red-600 text-xs mt-1">{{ faq_f.question.errors|join:", " }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="field-label">Answer</label>
+              {{ faq_f.answer }}
+              {% if faq_f.answer.errors %}<p class="text-red-600 text-xs mt-1">{{ faq_f.answer.errors|join:", " }}</p>{% endif %}
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="w-28">
+                <label class="field-label">Order</label>
+                {{ faq_f.order }}
+                {% if faq_f.order.errors %}<p class="text-red-600 text-xs mt-1">{{ faq_f.order.errors|join:", " }}</p>{% endif %}
+              </div>
+              {% if faq_f.instance.pk %}
+                <label class="delete-row-label">
+                  {{ faq_f.DELETE }}
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Delete this FAQ
+                </label>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </details>
+
+    <!-- ── SECTION 10 · Sponsors (collapsible) ───────────────────── -->
+<details class="card group" id="sec-sponsors" style="overflow:hidden;padding:0;">
+      <summary class="flex items-center justify-between cursor-pointer select-none p-6 rounded-xl hover:bg-forest-50 transition-colors" style="list-style:none;">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-forest-800 text-gold-300 shrink-0">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="font-display text-xl font-bold" style="color:#1B4332;">Sponsors <span class="font-normal text-base normal-case" style="color:#6B7B73;">(optional)</span></h2>
+            <p class="text-xs mt-0.5" style="color:#6B7B73;">Credit your sponsors on the event page</p>
+          </div>
+        </div>
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180 shrink-0" style="color:#6B7B73;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+      <div class="mt-6 pt-6 px-6 pb-6 space-y-4" id="sponsors-formset" style="border-top:1.5px solid #E8E3DA;">
+        {{ sponsor_forms.management_form }}
+        {% if sponsor_forms.non_form_errors %}<div class="alert-error">{{ sponsor_forms.non_form_errors }}</div>{% endif %}
+        {% for spf in sponsor_forms %}
+          <div class="rounded-xl border p-5 space-y-4" style="background:#F8FBF9;border-color:#B7E4C7;">
+            {{ spf.id }}
+            {% if spf.non_field_errors %}<div class="text-red-600 text-sm">{{ spf.non_field_errors }}</div>{% endif %}
+            <!-- Row 1: name + tier + amount -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="field-label">Sponsor Name</label>
+                {{ spf.name }}
+                {% if spf.name.errors %}<p class="text-red-600 text-xs mt-1">{{ spf.name.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Tier</label>
+                {{ spf.tier }}
+                {% if spf.tier.errors %}<p class="text-red-600 text-xs mt-1">{{ spf.tier.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Amount (₹) <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ spf.amount }}
+                {% if spf.amount.errors %}<p class="text-red-600 text-xs mt-1">{{ spf.amount.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <!-- Row 2: logo + website -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Logo <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ spf.logo }}
+                {% if spf.logo.errors %}<p class="text-red-600 text-xs mt-1">{{ spf.logo.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="field-label">Website <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+                {{ spf.website }}
+                {% if spf.website.errors %}<p class="text-red-600 text-xs mt-1">{{ spf.website.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <!-- description -->
+            <div>
+              <label class="field-label">Description <span class="font-normal normal-case" style="color:#6B7B73;">(optional)</span></label>
+              {{ spf.description }}
+              {% if spf.description.errors %}<p class="text-red-600 text-xs mt-1">{{ spf.description.errors|join:", " }}</p>{% endif %}
+            </div>
+            <!-- delete -->
+            {% if spf.instance.pk %}
+              <div class="flex justify-end">
+                <label class="delete-row-label">
+                  {{ spf.DELETE }}
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Delete this sponsor
+                </label>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </details>
+
+    <!-- ── Submit ─────────────────────────────────────────────────── -->
+    <div class="flex items-center gap-4 pt-2">
+      <button type="submit" class="btn-primary flex items-center gap-2">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        Create Event
+      </button>
+      <a href="{% url 'dashboard:events' %}" class="btn-ghost">Cancel</a>
+    </div>
+
+  </form>
 </div>
 
 <script>
-    async function autoFillAllFields() {
-        const briefText = document.getElementById('ai-brief').value;
-        const feedbackDiv = document.getElementById('auto-fill-feedback');
-        const debugDiv = document.getElementById('autofill-debug');
-        
-        if (!briefText.trim()) {
-            feedbackDiv.textContent = 'Please enter event details first';
-            feedbackDiv.className = 'mt-2 text-red-600 text-sm';
-            return;
-        }
+async function generateDescription() {
+  const bullets = document.getElementById('desc-bullets').value.trim();
+  const feedback = document.getElementById('desc-feedback');
+  const titleEl = document.querySelector('[name="title"]');
+  if (!bullets) { feedback.textContent = 'Paste some bullet points first.'; return; }
+  feedback.textContent = 'Generating…';
+  try {
+    const res = await fetch("{% url 'ai_services:generate_description' %}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value },
+      body: JSON.stringify({ bullets, event_title: titleEl ? titleEl.value : '' })
+    });
+    const json = await res.json();
+    if (!res.ok) { feedback.textContent = json.error || 'Error.'; return; }
+    const descEl = document.querySelector('[name="description"]');
+    if (descEl) descEl.value = json.description;
+    feedback.style.color = '#2D6A4F';
+    feedback.textContent = 'Description filled ✓';
+  } catch (e) { feedback.textContent = 'Network error: ' + e.message; }
+}
 
-        feedbackDiv.textContent = 'Processing...';
-        feedbackDiv.className = 'mt-2 text-blue-600 text-sm';
-        
-        try {
-            const response = await fetch('/api/ai/auto-fill-event/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value || ''
-                },
-                body: JSON.stringify({ brief: briefText })
-            });
-            
-            debugDiv.textContent = 'Status: ' + response.status + ', Content-Type: ' + response.headers.get('content-type');
-            debugDiv.style.display = 'block';
-            
-            const json = await response.json();
-            debugDiv.textContent += ' | Response keys: ' + Object.keys(json.form_data || {}).join(', ');
-            
-            if (!response.ok) {
-                feedbackDiv.textContent = 'Error: ' + (json.error || 'Request failed with status ' + response.status);
-                feedbackDiv.className = 'mt-2 text-red-600 text-sm';
-                return;
-            }
-            
-            if (json.form_data) {
-                const data = json.form_data;
-                const fieldsToFill = {
-                    'title': data.title,
-                    'description': data.description,
-                    'category': data.category,
-                    'mode': data.mode,
-                    'price_type': data.price_type,
-                    'status': data.status,
-                    'venue_name': data.venue_name,
-                    'venue_city': data.venue_city,
-                    'venue_address': data.venue_address,
-                    'online_link': data.online_link,
-                    'chief_guest': data.chief_guest,
-                    'total_capacity': data.total_capacity
-                };
-                
-                let filledCount = 0;
-                for (const [fieldName, fieldValue] of Object.entries(fieldsToFill)) {
-                    if (fieldValue) {
-                        const el = document.querySelector('[name="' + fieldName + '"]');
-                        if (el) {
-                            el.value = fieldValue;
-                            filledCount++;
-                        }
-                    }
-                }
-                
-                // Handle datetime fields separately
-                if (data.start_datetime) {
-                    const startEl = document.querySelector('[name="start_datetime"]');
-                    if (startEl) {
-                        // Convert ISO format to datetime-local format if needed
-                        let dateStr = data.start_datetime;
-                        if (dateStr.includes('T')) {
-                            dateStr = dateStr.substring(0, 16); // Get YYYY-MM-DDTHH:MM
-                        } else if (dateStr.includes(' ')) {
-                            dateStr = dateStr.replace(' ', 'T').substring(0, 16);
-                        }
-                        startEl.value = dateStr;
-                        filledCount++;
-                    }
-                }
-                
-                if (data.end_datetime) {
-                    const endEl = document.querySelector('[name="end_datetime"]');
-                    if (endEl) {
-                        // Convert ISO format to datetime-local format if needed
-                        let dateStr = data.end_datetime;
-                        if (dateStr.includes('T')) {
-                            dateStr = dateStr.substring(0, 16); // Get YYYY-MM-DDTHH:MM
-                        } else if (dateStr.includes(' ')) {
-                            dateStr = dateStr.replace(' ', 'T').substring(0, 16);
-                        }
-                        endEl.value = dateStr;
-                        filledCount++;
-                    }
-                }
-                
-                feedbackDiv.textContent = 'Success! Filled ' + filledCount + ' fields.';
-                feedbackDiv.className = 'mt-2 text-green-600 text-sm';
-                debugDiv.style.display = 'none';
-            } else {
-                feedbackDiv.textContent = 'Error: No form data returned';
-                feedbackDiv.className = 'mt-2 text-red-600 text-sm';
-            }
-        } catch (error) {
-            feedbackDiv.textContent = 'Error processing request: ' + error.message;
-            feedbackDiv.className = 'mt-2 text-red-600 text-sm';
-            debugDiv.textContent = 'Network error: ' + error.message;
-            debugDiv.style.display = 'block';
-        }
+async function autoFillAllFields() {
+  const brief = document.getElementById('ai-brief').value.trim();
+  const feedback = document.getElementById('auto-fill-feedback');
+  if (!brief) { feedback.textContent = 'Please enter event details first.'; return; }
+  feedback.textContent = 'Processing…';
+  try {
+    const res = await fetch("{% url 'ai_services:auto_fill_event' %}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value },
+      body: JSON.stringify({ brief })
+    });
+    const json = await res.json();
+    if (!res.ok) { feedback.textContent = json.error || 'Request failed.'; return; }
+    const d = json.form_data || {};
+    const simple = ['title','description','category','mode','price_type','status',
+                    'venue_name','venue_city','venue_address','online_link',
+                    'chief_guest','total_capacity','ai_knowledge'];
+    let filled = 0;
+    for (const key of simple) {
+      if (d[key] !== undefined && d[key] !== '') {
+        const el = document.querySelector('[name="' + key + '"]');
+        if (el) { el.value = d[key]; filled++; }
+      }
     }
+    ['start_datetime','end_datetime'].forEach(key => {
+      if (d[key]) {
+        const el = document.querySelector('[name="' + key + '"]');
+        if (el) {
+          let v = d[key];
+          if (v.includes('T')) v = v.substring(0, 16);
+          else if (v.includes(' ')) v = v.replace(' ','T').substring(0, 16);
+          el.value = v; filled++;
+        }
+      }
+    });
+    feedback.style.color = '#52B788';
+    feedback.textContent = 'Filled ' + filled + ' fields ✓';
+    if (d.venue_name || d.venue_city) document.getElementById('sec-venue').open = true;
+  } catch (e) { feedback.textContent = 'Error: ' + e.message; }
+}
 </script>
 
 {% endblock %}

@@ -1,36 +1,83 @@
-<div class="relative group">
-    <button class="relative p-2 text-serene-600 hover:text-serene-900 transition">
-        <span class="text-lg">🔔</span>
+{% if user.is_authenticated %}
+<div class="relative" data-dropdown>
+    <button onclick="toggleDropdown('notif-panel')"
+            class="relative p-2 rounded-lg transition-colors"
+            style="color:#95D5B2;"
+            onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+            onmouseout="this.style.background='transparent'"
+            aria-label="Notifications">
+        <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
+            <path d="M9.5 2a5.5 5.5 0 015.5 5.5c0 3.036.632 4.772 1.2 5.657.297.466.3.843-.1.843H2.9c-.4 0-.397-.377-.1-.843C3.368 12.272 4 10.536 4 7.5A5.5 5.5 0 019.5 2z"
+                  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M7.5 14a2 2 0 004 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
         {% if unread_notifications %}
-            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                {{ unread_notifications|truncatewords:2 }}
-            </span>
+            <span class="notif-dot"></span>
         {% endif %}
     </button>
 
-    <div class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 invisible group-hover:visible transition z-50">
-        <div class="p-4 border-b border-serene-200">
-            <h3 class="font-bold text-serene-900">Notifications</h3>
+    <!-- Dropdown panel -->
+    <div id="notif-panel" class="dropdown-menu hidden absolute right-0 mt-2" style="width:320px;">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #E8E3DA;">
+            <h3 style="font-size:.875rem; font-weight:600; color:#1B4332;">Notifications</h3>
+            {% if unread_notifications %}
+                <span class="badge-gold">{{ unread_notifications }} new</span>
+            {% endif %}
         </div>
 
-        <div class="max-h-96 overflow-y-auto">
-            {% if unread_count %}
+        <!-- Notification items -->
+        <div style="max-height:340px; overflow-y:auto;">
+            {% if recent_notifications %}
                 {% for notification in recent_notifications %}
-                    <a href="{{ notification.action_url }}" class="block px-4 py-3 hover:bg-serene-50 border-b border-serene-100 transition">
-                        <p class="font-semibold text-serene-900 text-sm">{{ notification.title }}</p>
-                        <p class="text-serene-700 text-xs truncate">{{ notification.message }}</p>
-                        <p class="text-serene-500 text-xs mt-1">{{ notification.created_at|timesince }} ago</p>
+                    <a href="{{ notification.action_url|default:'#' }}"
+                       class="flex gap-3 px-4 py-3 transition-colors"
+                       style="border-bottom:1px solid #F0EBE1; text-decoration:none;"
+                       onmouseover="this.style.background='#F8F5F0'"
+                       onmouseout="this.style.background='transparent'">
+                        <!-- Icon dot -->
+                        <div class="flex-shrink-0 mt-0.5">
+                            {% if not notification.is_read %}
+                                <div style="width:8px;height:8px;border-radius:50%;background:#D4A017;margin-top:4px;"></div>
+                            {% else %}
+                                <div style="width:8px;height:8px;border-radius:50%;background:#D6D0C8;margin-top:4px;"></div>
+                            {% endif %}
+                        </div>
+                        <div style="min-width:0;">
+                            <p style="font-size:.8rem; font-weight:600; color:#1B4332; margin:0 0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                {{ notification.title }}
+                            </p>
+                            <p style="font-size:.75rem; color:#6B7B73; margin:0 0 3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                {{ notification.message }}
+                            </p>
+                            <p style="font-size:.7rem; color:#9BA9A0; margin:0;">
+                                {{ notification.created_at|timesince }} ago
+                            </p>
+                        </div>
                     </a>
                 {% endfor %}
             {% else %}
-                <div class="p-8 text-center text-serene-600">
-                    <p class="text-sm">No new notifications</p>
+                <div class="flex flex-col items-center justify-center py-10 px-4">
+                    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="color:#D6D0C8; margin-bottom:10px;">
+                        <path d="M18 4a10 10 0 0110 10c0 5.523 1.15 8.677 2.182 10.286C30.72 25.2 30.727 26 30 26H6c-.727 0-.72-.8-.182-1.714C6.85 22.677 8 19.523 8 14A10 10 0 0118 4z"
+                              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M14 27a4 4 0 008 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <p style="font-size:.8rem; color:#9BA9A0; margin:0;">You're all caught up!</p>
                 </div>
             {% endif %}
         </div>
 
-        <a href="{% url 'dashboard:notifications' %}" class="block px-4 py-3 text-center text-serene-600 hover:text-serene-900 border-t border-serene-200 font-medium text-sm transition">
-            View All
+        <!-- Footer -->
+        <a href="{% url 'dashboard:notifications' %}"
+           style="display:block; text-align:center; padding:.75rem 1rem; font-size:.8rem; font-weight:600;
+                  color:#2D6A4F; border-top:1px solid #E8E3DA; text-decoration:none;
+                  border-radius: 0 0 0.75rem 0.75rem; transition:background .15s;"
+           onmouseover="this.style.background='#F0EBE1'"
+           onmouseout="this.style.background='transparent'">
+            View all notifications →
         </a>
     </div>
 </div>
+{% endif %}

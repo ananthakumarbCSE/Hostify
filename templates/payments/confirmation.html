@@ -2,36 +2,36 @@
 {% block title %}Confirm Order — {{ event.title }}{% endblock %}
 {% block content %}
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    
-    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
-        <h1 class="text-3xl font-bold text-serene-900 mb-2">Order Summary</h1>
-        <p class="text-serene-600 mb-8">Review and confirm your ticket purchase</p>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 page-fade-in">
+
+    <div class="card p-8 mb-8">
+        <h1 class="page-title text-3xl mb-1">Order Summary</h1>
+        <p class="mb-8" style="color: #6B7B73;">Review and confirm your ticket purchase</p>
 
         <!-- Event Info -->
-        <div class="bg-serene-50 rounded-lg p-6 mb-8 border-l-4 border-serene-300">
-            <h2 class="text-xl font-bold text-serene-900 mb-2">{{ event.title }}</h2>
-            <p class="text-serene-700">{{ event.start_datetime|date:"F d, Y" }} • {{ event.start_datetime|time:"g:i A" }}</p>
+        <div class="rounded-lg p-6 mb-8 border-l-4" style="background: #F0EBE1; border-color: #40916C;">
+            <h2 class="font-display text-xl font-bold mb-1" style="color: #1B4332;">{{ event.title }}</h2>
+            <p style="color: #2D6A4F;">{{ event.start_datetime|date:"F d, Y" }} &bull; {{ event.start_datetime|time:"g:i A" }}</p>
         </div>
 
         <!-- Order Table -->
         <div class="overflow-x-auto mb-8">
-            <table class="w-full">
+            <table class="hf-table w-full">
                 <thead>
-                    <tr class="border-b-2 border-serene-300">
-                        <th class="text-left py-4 px-4 text-serene-900 font-bold">Ticket Type</th>
-                        <th class="text-center py-4 px-4 text-serene-900 font-bold">Quantity</th>
-                        <th class="text-right py-4 px-4 text-serene-900 font-bold">Unit Price</th>
-                        <th class="text-right py-4 px-4 text-serene-900 font-bold">Total</th>
+                    <tr style="border-bottom: 2px solid #B7E4C7;">
+                        <th class="text-left py-4 px-4 font-bold" style="color: #1B4332;">Ticket Type</th>
+                        <th class="text-center py-4 px-4 font-bold" style="color: #1B4332;">Qty</th>
+                        <th class="text-right py-4 px-4 font-bold" style="color: #1B4332;">Unit Price</th>
+                        <th class="text-right py-4 px-4 font-bold" style="color: #1B4332;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in items %}
-                    <tr class="border-b border-serene-200 hover:bg-serene-50">
-                        <td class="py-4 px-4 text-serene-900">{{ item.tier.name }}</td>
-                        <td class="py-4 px-4 text-center text-serene-700">{{ item.quantity }}</td>
-                        <td class="py-4 px-4 text-right text-serene-700">₹{{ item.unit_price }}</td>
-                        <td class="py-4 px-4 text-right text-serene-900 font-bold">₹{{ item.line_total }}</td>
+                    <tr style="border-bottom: 1px solid #E8E3DA;">
+                        <td class="py-4 px-4 font-medium" style="color: #1B4332;">{{ item.tier.name }}</td>
+                        <td class="py-4 px-4 text-center" style="color: #2C3E35;">{{ item.quantity }}</td>
+                        <td class="py-4 px-4 text-right" style="color: #2C3E35;">₹{{ item.unit_price }}</td>
+                        <td class="py-4 px-4 text-right font-bold" style="color: #1B4332;">₹{{ item.line_total }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -39,30 +39,28 @@
         </div>
 
         <!-- Price Summary -->
-        <div class="bg-serene-50 rounded-lg p-6 mb-8">
+        <div class="rounded-lg p-6 mb-8" style="background: #F0EBE1;">
             <div class="space-y-3">
                 <div class="flex justify-between">
-                    <span class="text-serene-700">Subtotal</span>
-                    <span class="font-bold text-serene-900">₹{{ subtotal }}</span>
+                    <span style="color: #6B7B73;">Subtotal</span>
+                    <span class="font-bold" style="color: #1B4332;">₹{{ subtotal }}</span>
                 </div>
                 {% if discount_amount > 0 %}
-                <div class="flex justify-between text-green-600">
+                <div class="flex justify-between" style="color: #2D6A4F;">
                     <span>Discount {% if discount %}({{ discount.code }}){% endif %}</span>
                     <span class="font-bold">-₹{{ discount_amount }}</span>
                 </div>
                 {% endif %}
-                <div class="border-t-2 border-serene-300 pt-3 flex justify-between">
-                    <span class="text-lg font-bold text-serene-900">Total Amount</span>
-                    <span class="text-2xl font-bold text-serene-600">₹{{ total }}</span>
+                <div class="flex justify-between pt-3" style="border-top: 2px solid #B7E4C7;">
+                    <span class="text-lg font-bold" style="color: #1B4332;">Total Amount</span>
+                    <span class="font-display text-2xl font-bold" style="color: #D4A017;">₹{{ total }}</span>
                 </div>
             </div>
         </div>
 
         <!-- Discount Error -->
         {% if discount_error %}
-            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded mb-8 text-red-700">
-                {{ discount_error }}
-            </div>
+            <div class="alert-error mb-8">{{ discount_error }}</div>
         {% endif %}
 
         <!-- Payment Form -->
@@ -74,21 +72,21 @@
                 <input type="hidden" name="tier_{{ item.tier.pk }}" value="{{ item.quantity }}">
             {% endfor %}
 
-            <div class="bg-blue-50 border-l-4 border-blue-300 p-4 rounded">
-                <p class="text-blue-800 text-sm">
+            <div class="rounded-lg p-4 border-l-4" style="background: #EFF6FF; border-color: #93C5FD;">
+                <p class="text-sm" style="color: #1E40AF;">
                     After payment, you will receive QR code tickets in your dashboard for event check-in and verification.
                 </p>
             </div>
 
-            <button type="submit" class="w-full py-4 bg-serene-300 text-white font-bold text-lg rounded-lg hover:bg-serene-400 transition transform hover:scale-105">
+            <button type="submit" class="btn-primary w-full py-4 text-lg">
                 Proceed to Payment
             </button>
         </form>
 
         <!-- Back Link -->
-        <div class="text-center mt-8 pt-8 border-t border-serene-200">
-            <a href="{% url 'events:detail' event.slug %}" class="text-serene-600 hover:text-serene-900 font-medium transition">
-                Back to Event Details
+        <div class="text-center mt-8 pt-8" style="border-top: 1px solid #E8E3DA;">
+            <a href="{% url 'events:detail' event.slug %}" class="font-medium transition hover:underline" style="color: #2D6A4F;">
+                &larr; Back to Event Details
             </a>
         </div>
     </div>
@@ -105,21 +103,14 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
     const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
     const items = [
         {% for item in items %}
-        {tier_id: {{ item.tier.pk }}, qty: {{ item.quantity }} },
+        { tier_id: {{ item.tier.pk }}, qty: {{ item.quantity }} },
         {% endfor %}
     ];
 
     const response = await fetch('/api/payments/create-order/', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({
-            event_id: eventId,
-            items: items,
-            discount_code: discountCode,
-        }),
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ event_id: eventId, items: items, discount_code: discountCode }),
     });
 
     const data = await response.json();
@@ -140,28 +131,20 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
         name: '{{ event.title|escapejs }}',
         description: 'Ticket Purchase',
         order_id: data.razorpay_order_id,
-        prefill: {
-            email: '{{ request.user.email|default:''|escapejs }}',
-        },
+        prefill: { email: '{{ request.user.email|default:''|escapejs }}' },
         handler: async function (response) {
             const callbackResponse = await fetch('/api/payments/callback/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
                 body: JSON.stringify({
-                    razorpay_order_id: data.razorpay_order_id,
+                    razorpay_order_id:   data.razorpay_order_id,
                     razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_signature: response.razorpay_signature,
+                    razorpay_signature:  response.razorpay_signature,
                 }),
             });
             const result = await callbackResponse.json();
-            if (result.ok) {
-                window.location = result.redirect;
-            } else {
-                alert(result.error || 'Payment failed. Please try again.');
-            }
+            if (result.ok) { window.location = result.redirect; }
+            else { alert(result.error || 'Payment failed. Please try again.'); }
         },
     };
     new Razorpay(options).open();

@@ -1,132 +1,225 @@
 {% extends "base.html" %}
-{% block title %}{{ event.title }}{% endblock %}
+{% block title %}{{ event.title }} — Hostify{% endblock %}
 {% block content %}
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Hero Section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-fade-in">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 py-12">
-        
-        <!-- Main Content -->
-        <div class="lg:col-span-2">
+
+        <!-- ── Main Content ── -->
+        <div class="lg:col-span-2 space-y-8">
+
             <!-- Banner -->
             {% if event.banner %}
-                <div class="rounded-xl overflow-hidden shadow-lg mb-8 h-96">
+                <div class="rounded-xl overflow-hidden shadow-lg h-96">
                     <img src="{{ event.banner.url }}" alt="{{ event.title }}" class="w-full h-full object-cover">
                 </div>
             {% endif %}
 
             <!-- Event Details -->
-            <div class="bg-white rounded-xl shadow-md p-8 mb-8">
+            <div class="card p-8">
                 <div class="flex items-start justify-between mb-6">
                     <div>
-                        <h1 class="text-4xl font-bold text-serene-900 mb-4">{{ event.title }}</h1>
+                        <h1 class="page-title text-4xl mb-2">{{ event.title }}</h1>
                         {% if event.chief_guest %}
-                            <p class="text-serene-600 text-lg">Featuring: <span class="font-bold text-serene-900">{{ event.chief_guest }}</span></p>
+                            <p style="color: #6B7B73;">Featuring: <span class="font-bold" style="color: #1B4332;">{{ event.chief_guest }}</span></p>
                         {% endif %}
                     </div>
                     {% if event.logo %}
-                        <img src="{{ event.logo.url }}" alt="{{ event.title }}" class="w-24 h-24 rounded-lg object-cover shadow-md">
+                        <img src="{{ event.logo.url }}" alt="{{ event.title }}" class="w-24 h-24 rounded-lg object-cover shadow-md flex-shrink-0 ml-4">
                     {% endif %}
                 </div>
 
-                <!-- Event Meta -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 pb-8 border-b-2 border-serene-200">
-                    <div class="bg-serene-50 p-4 rounded-lg">
-                        <p class="text-serene-600 text-sm font-semibold">Category</p>
-                        <p class="text-serene-900 font-bold">{{ event.get_category_display }}</p>
+                <!-- Meta Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 pb-8 divider">
+                    <div class="rounded-lg p-4" style="background: #F0EBE1;">
+                        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Category</p>
+                        <p class="font-bold" style="color: #1B4332;">{{ event.get_category_display }}</p>
                     </div>
-                    <div class="bg-serene-50 p-4 rounded-lg">
-                        <p class="text-serene-600 text-sm font-semibold">Mode</p>
-                        <p class="text-serene-900 font-bold">{{ event.get_mode_display }}</p>
+                    <div class="rounded-lg p-4" style="background: #F0EBE1;">
+                        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Mode</p>
+                        <p class="font-bold" style="color: #1B4332;">{{ event.get_mode_display }}</p>
                     </div>
-                    <div class="bg-serene-50 p-4 rounded-lg">
-                        <p class="text-serene-600 text-sm font-semibold">Date</p>
-                        <p class="text-serene-900 font-bold">{{ event.start_datetime|date:"M d, Y" }}</p>
+                    <div class="rounded-lg p-4" style="background: #F0EBE1;">
+                        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Date</p>
+                        <p class="font-bold" style="color: #1B4332;">{{ event.start_datetime|date:"M d, Y" }}</p>
                     </div>
-                    <div class="bg-serene-50 p-4 rounded-lg">
-                        <p class="text-serene-600 text-sm font-semibold">Time</p>
-                        <p class="text-serene-900 font-bold">{{ event.start_datetime|time:"g:i A" }}</p>
+                    <div class="rounded-lg p-4" style="background: #F0EBE1;">
+                        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Time</p>
+                        <p class="font-bold" style="color: #1B4332;">{{ event.start_datetime|time:"g:i A" }}</p>
                     </div>
                 </div>
 
-                <!-- Venue/Location -->
+                <!-- Venue / Location -->
                 {% if event.venue_name or event.online_link %}
-                    <div class="mb-8 pb-8 border-b-2 border-serene-200">
-                        <h3 class="text-lg font-bold text-serene-900 mb-4">Location</h3>
+                    <div class="mb-8 pb-8 divider">
+                        <h3 class="font-display text-lg font-bold mb-3" style="color: #1B4332;">Location</h3>
                         {% if event.venue_name %}
-                            <p class="text-serene-700 mb-2">
+                            <p style="color: #2C3E35;">
                                 <span class="font-semibold">{{ event.venue_name }}</span><br>
                                 {{ event.venue_address }}, {{ event.venue_city }}
                             </p>
                         {% endif %}
                         {% if event.online_link %}
-                            <a href="{{ event.online_link }}" target="_blank" class="inline-block px-4 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 transition font-medium">
+                            <a href="{{ event.online_link }}" target="_blank" class="btn-primary inline-block mt-3 px-4 py-2 text-sm">
                                 Join Online
                             </a>
                         {% endif %}
                     </div>
                 {% endif %}
-
+                <br>
                 <!-- Description -->
                 <div class="mb-8">
-                    <h3 class="text-lg font-bold text-serene-900 mb-4">About Event</h3>
-                    <p class="text-serene-700 leading-relaxed whitespace-pre-wrap">{{ event.description }}</p>
+                    <h3 class="font-display text-lg font-bold mb-3" style="color: #1B4332;">About This Event</h3>
+                    <p class="leading-relaxed whitespace-pre-wrap" style="color: #2C3E35;">{{ event.description }}</p>
                 </div>
 
                 <!-- Wishlist -->
                 {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'dashboard:wishlist_toggle' %}" class="mb-8">
+                    <form method="post" action="{% url 'dashboard:wishlist_toggle' %}">
                         {% csrf_token %}
                         <input type="hidden" name="event_id" value="{{ event.pk }}">
-                        <button type="submit" class="px-6 py-3 {% if in_wishlist %}bg-red-500 hover:bg-red-600{% else %}bg-serene-200 hover:bg-serene-300{% endif %} text-white font-bold rounded-lg transition">
-                            {% if in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}
+                        <button type="submit"
+                            class="px-6 py-3 rounded-lg font-bold transition
+                            {% if in_wishlist %}bg-red-500 hover:bg-red-600 text-white{% else %}btn-outline{% endif %}">
+                            {% if in_wishlist %}
+                                <svg class="inline w-4 h-4 mr-1 -mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+                                Remove from Wishlist
+                            {% else %}
+                                <svg class="inline w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/></svg>
+                                Add to Wishlist
+                            {% endif %}
                         </button>
                     </form>
                 {% endif %}
             </div>
 
-            <!-- Agenda -->
+            <!-- Agenda / Sessions -->
             {% if sessions %}
-                <div class="bg-white rounded-xl shadow-md p-8">
-                    <h2 class="text-2xl font-bold text-serene-900 mb-6">Agenda</h2>
+                <div class="card p-8">
+                    <h2 class="font-display text-2xl font-bold mb-6" style="color: #1B4332;">Agenda</h2>
                     <div class="space-y-4">
                         {% for session in sessions %}
-                            <div class="border-l-4 border-serene-300 pl-6 py-4 hover:bg-serene-50 rounded transition">
-                                <h3 class="text-lg font-bold text-serene-900">{{ session.title }}</h3>
-                                <p class="text-serene-600 text-sm">{{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</p>
+                            <div class="border-l-4 pl-6 py-4 rounded-r-lg hover:opacity-90 transition" style="border-color: #40916C; background: #F8F5F0;">
+                                <h3 class="font-bold" style="color: #1B4332;">{{ session.title }}</h3>
+                                <p class="text-sm mt-0.5" style="color: #6B7B73;">{{ session.start_time|time:"g:i A" }} — {{ session.end_time|time:"g:i A" }}</p>
                                 {% if session.speaker %}
-                                    <p class="text-serene-700 mt-2">Speaker: <span class="font-semibold">{{ session.speaker }}</span></p>
+                                    <p class="text-sm mt-1" style="color: #2C3E35;">Speaker: <span class="font-semibold">{{ session.speaker }}</span></p>
                                 {% endif %}
                                 {% if session.location %}
-                                    <p class="text-serene-700">Location: {{ session.location }}</p>
+                                    <p class="text-sm" style="color: #2C3E35;">Location: {{ session.location }}</p>
                                 {% endif %}
                             </div>
                         {% endfor %}
                     </div>
                 </div>
             {% endif %}
+
+            <!-- FAQs -->
+            {% if faqs %}
+                <div class="card p-8">
+                    <h2 class="font-display text-2xl font-bold mb-6" style="color: #1B4332;">FAQs</h2>
+                    <div class="space-y-4">
+                        {% for faq in faqs %}
+                            <details class="rounded-lg overflow-hidden border" style="border-color: #E8E3DA;">
+                                <summary class="px-5 py-4 font-semibold cursor-pointer select-none" style="color: #1B4332; background: #F0EBE1;">
+                                    {{ faq.question }}
+                                </summary>
+                                <p class="px-5 py-4 leading-relaxed" style="color: #2C3E35; background: #FDFCF9;">{{ faq.answer }}</p>
+                            </details>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Q&A -->
+            {% if public_questions %}
+                <div class="card p-8">
+                    <h2 class="font-display text-2xl font-bold mb-6" style="color: #1B4332;">Attendee Questions</h2>
+                    <div class="space-y-4">
+                        {% for q in public_questions %}
+                            <div class="rounded-lg p-4" style="background: #F8F5F0; border: 1px solid #E8E3DA;">
+                                <p class="font-semibold mb-1" style="color: #1B4332;">{{ q.question }}</p>
+                                {% if q.answer %}
+                                    <p class="text-sm" style="color: #2C3E35;">{{ q.answer }}</p>
+                                {% else %}
+                                    <span class="badge-muted text-xs">Awaiting answer</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Reviews -->
+            {% if reviews %}
+                <div class="card p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-display text-2xl font-bold" style="color: #1B4332;">Reviews</h2>
+                        {% if avg_rating %}
+                            <div class="flex items-center gap-2">
+                                <span class="font-display text-3xl font-bold" style="color: #D4A017;">{{ avg_rating|floatformat:1 }}</span>
+                                <div>
+                                    <div class="flex gap-0.5">
+                                        {% for i in "12345" %}
+                                            <svg class="w-4 h-4" fill="{% if forloop.counter <= avg_rating|floatformat:0|add:'0' %}#D4A017{% else %}#E8E3DA{% endif %}" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-xs" style="color: #6B7B73;">{{ reviews.count }} review{{ reviews.count|pluralize }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-5">
+                        {% for review in reviews %}
+                            <div class="pb-5 border-b last:border-0" style="border-color: #E8E3DA;">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="font-semibold" style="color: #1B4332;">{{ review.author.get_full_name|default:review.author.username }}</p>
+                                    <div class="flex gap-0.5">
+                                        {% for i in "12345" %}
+                                            <svg class="w-3.5 h-3.5" fill="{% if forloop.counter <= review.rating %}#D4A017{% else %}#E8E3DA{% endif %}" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="text-sm leading-relaxed" style="color: #2C3E35;">{{ review.body }}</p>
+                                <p class="text-xs mt-1" style="color: #6B7B73;">{{ review.created_at|date:"M d, Y" }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
         </div>
 
-        <!-- Sidebar - Tickets -->
+        <!-- ── Ticket Sidebar ── -->
         <div class="lg:col-span-1">
-            <!-- Ticket Purchase Card -->
-            <div class="bg-white rounded-xl shadow-md p-8 sticky top-20">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6">Get Tickets</h2>
+            <div class="card p-8 sticky top-20">
+                <h2 class="font-display text-2xl font-bold mb-6" style="color: #1B4332;">Get Tickets</h2>
 
                 {% if tiers %}
                     <div class="space-y-4 mb-6">
                         {% for tier in tiers %}
-                            <div class="border-2 border-serene-200 rounded-lg p-4 hover:border-serene-300 transition">
-                                <h4 class="font-bold text-serene-900">{{ tier.name }}</h4>
-                                <p class="text-serene-600 text-sm">{{ tier.get_tier_type_display }}</p>
-                                <p class="text-2xl font-bold text-serene-600 my-2">₹{{ tier.current_price }}</p>
+                            <div class="rounded-lg p-4 border-2 transition hover:shadow-md" style="border-color: #B7E4C7;">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h4 class="font-bold" style="color: #1B4332;">{{ tier.name }}</h4>
+                                        <p class="text-xs mt-0.5" style="color: #6B7B73;">{{ tier.get_tier_type_display }}</p>
+                                    </div>
+                                    <span class="font-display text-xl font-bold" style="color: #D4A017;">₹{{ tier.current_price }}</span>
+                                </div>
                                 {% if tier.tickets_remaining is not None %}
-                                    <p class="text-sm text-serene-600">Available: <span class="font-bold">{{ tier.tickets_remaining }}</span></p>
+                                    <p class="text-xs mt-2" style="color: #6B7B73;">
+                                        <span class="font-bold" style="color: #2D6A4F;">{{ tier.tickets_remaining }}</span> seats left
+                                    </p>
                                 {% else %}
-                                    <p class="text-sm text-serene-600">Unlimited seats</p>
+                                    <p class="text-xs mt-2" style="color: #6B7B73;">Unlimited seats</p>
                                 {% endif %}
                                 {% if tier.early_bird_price and tier.early_bird_expires %}
-                                    <p class="text-xs text-serene-500 mt-2">Early Bird: ₹{{ tier.early_bird_price }} until {{ tier.early_bird_expires|date:"M d" }}</p>
+                                    <p class="text-xs mt-1" style="color: #A67C00;">Early Bird: ₹{{ tier.early_bird_price }} until {{ tier.early_bird_expires|date:"M d" }}</p>
                                 {% endif %}
                             </div>
                         {% endfor %}
@@ -136,40 +229,39 @@
                         <form id="buy-form" method="post" action="{% url 'payments:confirm_order' %}" class="space-y-4">
                             {% csrf_token %}
                             <input type="hidden" name="event_id" value="{{ event.pk }}">
-                            
+
                             {% for tier in tiers %}
                                 <div>
-                                    <label class="text-serene-700 font-semibold text-sm block mb-2">{{ tier.name }}</label>
-                                    <input type="number" name="tier_{{ tier.pk }}" min="0" max="{{ tier.max_per_order }}" value="0" 
-                                        class="w-full px-3 py-2 border-2 border-serene-200 rounded-lg focus:outline-none focus:border-serene-400 bg-serene-50">
+                                    <label class="field-label">{{ tier.name }}</label>
+                                    <input type="number" name="tier_{{ tier.pk }}" min="0" max="{{ tier.max_per_order }}" value="0"
+                                        class="input-field">
                                 </div>
                             {% endfor %}
 
                             <div>
-                                <label class="text-serene-700 font-semibold text-sm block mb-2">Discount Code (Optional)</label>
-                                <input type="text" name="discount_code" placeholder="Enter code..."
-                                    class="w-full px-3 py-2 border-2 border-serene-200 rounded-lg focus:outline-none focus:border-serene-400 bg-serene-50">
+                                <label class="field-label">Discount Code <span style="color: #6B7B73;">(Optional)</span></label>
+                                <input type="text" name="discount_code" placeholder="Enter code..." class="input-field">
                             </div>
 
-                            <button type="submit" class="w-full py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition transform hover:scale-105">
+                            <button type="submit" class="btn-primary w-full py-3 text-center">
                                 Review Order
                             </button>
                         </form>
                     {% else %}
-                        <p class="bg-serene-50 border-l-4 border-serene-300 p-4 rounded text-serene-700 text-sm mb-4">
-                            Sign in to purchase tickets
-                        </p>
-                        <a href="{% url 'accounts:login' %}" class="block w-full py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition text-center">
-                            Sign In to Buy
-                        </a>
+                        <div class="rounded-lg p-4 mb-4 border-l-4" style="background: #F0EBE1; border-color: #40916C;">
+                            <p class="text-sm" style="color: #2D6A4F;">Sign in to purchase tickets</p>
+                        </div>
+                        <a href="{% url 'accounts:login' %}" class="btn-primary w-full py-3 block text-center">Sign In to Buy</a>
                     {% endif %}
+
                 {% else %}
-                    <div class="bg-serene-50 border-l-4 border-serene-300 p-4 rounded">
-                        <p class="text-serene-700 font-semibold">Tickets coming soon</p>
+                    <div class="rounded-lg p-4 border-l-4" style="background: #F0EBE1; border-color: #40916C;">
+                        <p class="font-semibold" style="color: #2D6A4F;">Tickets coming soon</p>
                     </div>
                 {% endif %}
             </div>
         </div>
+
     </div>
 </div>
 

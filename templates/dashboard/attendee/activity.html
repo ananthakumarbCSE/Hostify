@@ -1,73 +1,184 @@
 {% extends "dashboard/base_dashboard.html" %}
-{% block title %}My Tickets{% endblock %}
+{% block dashboard_title %}My Activity{% endblock %}
+{% block dashboard_heading %}My Activity{% endblock %}
+{% block dashboard_subheading %}Upcoming events and your wishlist{% endblock %}
+
 {% block dashboard_content %}
 
-<div class="p-8">
-    <h1 class="text-4xl font-bold text-serene-900 mb-8">My Tickets</h1>
+<div class="space-y-10">
 
-    {% if my_tickets %}
-        <div class="space-y-6">
-            {% for ticket in my_tickets %}
-                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition border-l-4 border-serene-300">
-                    <div class="p-8">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            
-                            <!-- Event Info -->
-                            <div class="md:col-span-2">
-                                <div class="flex items-start gap-4 mb-6">
-                                    {% if ticket.tier.event.logo %}
-                                        <img src="{{ ticket.tier.event.logo.url }}" alt="Event logo" class="w-16 h-16 rounded-lg object-cover">
-                                    {% endif %}
-                                    <div>
-                                        <h3 class="text-2xl font-bold text-serene-900 mb-2">{{ ticket.tier.event.title }}</h3>
-                                        <p class="text-serene-600">{{ ticket.tier.name }}</p>
-                                    </div>
-                                </div>
+    <!-- ── Upcoming Tickets ── -->
+    <section>
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="font-display text-xl font-bold" style="color: #1B4332;">Upcoming Tickets</h2>
+            {% if upcoming_tickets %}
+                <span class="badge-green">{{ upcoming_tickets.count }} ticket{{ upcoming_tickets.count|pluralize }}</span>
+            {% endif %}
+        </div>
 
-                                <div class="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <p class="text-serene-600 font-semibold">Date</p>
-                                        <p class="text-serene-900">{{ ticket.tier.event.start_datetime|date:"M d, Y" }}</p>
+        {% if upcoming_tickets %}
+            <div class="space-y-4">
+                {% for ticket in upcoming_tickets %}
+                <div class="card overflow-hidden border-l-4" style="border-left-color: #40916C;">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
+
+                        <!-- Event Info -->
+                        <div class="md:col-span-2 p-6">
+                            <div class="flex items-start gap-4 mb-5">
+                                {% if ticket.tier.event.logo %}
+                                    <img src="{{ ticket.tier.event.logo.url }}" alt="Event logo"
+                                        class="w-14 h-14 rounded-lg object-cover flex-shrink-0 shadow-sm">
+                                {% else %}
+                                    <div class="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0"
+                                        style="background: linear-gradient(135deg, #2D6A4F, #40916C);">
+                                        <svg class="w-6 h-6 opacity-60" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a3 3 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"/>
+                                        </svg>
                                     </div>
-                                    <div>
-                                        <p class="text-serene-600 font-semibold">Time</p>
-                                        <p class="text-serene-900">{{ ticket.tier.event.start_datetime|time:"g:i A" }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-serene-600 font-semibold">Ticket ID</p>
-                                        <p class="text-serene-900 font-mono">{{ ticket.ticket_id }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-serene-600 font-semibold">Status</p>
-                                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Active</span>
-                                    </div>
+                                {% endif %}
+                                <div>
+                                    <h3 class="font-display text-lg font-bold mb-0.5" style="color: #1B4332;">
+                                        {{ ticket.tier.event.title }}
+                                    </h3>
+                                    <p class="text-sm" style="color: #6B7B73;">{{ ticket.tier.name }}</p>
                                 </div>
                             </div>
 
-                            <!-- QR Code -->
-                            <div class="flex flex-col items-center justify-center bg-serene-50 rounded-lg p-6">
-                                <div class="mb-4">
-                                    <div class="w-32 h-32 bg-serene-200 rounded-lg flex items-center justify-center">
-                                        <span class="text-serene-600 text-sm text-center">QR Code</span>
-                                    </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Date</p>
+                                    <p class="font-medium" style="color: #1B4332;">{{ ticket.tier.event.start_datetime|date:"M d, Y" }}</p>
                                 </div>
-                                <button class="px-4 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 transition font-medium text-sm">
-                                    Download
-                                </button>
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Time</p>
+                                    <p class="font-medium" style="color: #1B4332;">{{ ticket.tier.event.start_datetime|time:"g:i A" }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Ticket ID</p>
+                                    <p class="font-mono text-xs" style="color: #2C3E35;">{{ ticket.ticket_id }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Status</p>
+                                    <span class="badge-green">Active</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QR + Actions -->
+                        <div class="md:col-span-1 flex flex-col items-center justify-center gap-4 p-6"
+                            style="background: #F8F5F0; border-left: 1px solid #E8E3DA;">
+                            {% if ticket.qr_code %}
+                                <img src="{{ ticket.qr_code.url }}" alt="QR Code"
+                                    class="w-28 h-28 rounded-lg shadow-sm">
+                            {% else %}
+                                <div class="w-28 h-28 rounded-lg flex flex-col items-center justify-center gap-1"
+                                    style="background: #E8E3DA;">
+                                    <svg class="w-8 h-8" fill="none" stroke="#6B7B73" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 18.75h.75v.75h-.75v-.75zM18.75 13.5h.75v.75h-.75v-.75zM18.75 18.75h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"/>
+                                    </svg>
+                                    <span class="text-xs" style="color: #6B7B73;">QR Pending</span>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex flex-col gap-2 w-full">
+                                {% if ticket.qr_code %}
+                                    <a href="{{ ticket.qr_code.url }}" download
+                                        class="btn-primary py-2 text-xs text-center">
+                                        Download QR
+                                    </a>
+                                {% endif %}
+                                <a href="{% url 'events:detail' ticket.tier.event.slug %}"
+                                    class="btn-outline py-2 text-xs text-center">
+                                    View Event
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="card p-12 text-center">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background: #F0EBE1;">
+                    <svg class="w-7 h-7" fill="none" stroke="#2D6A4F" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a3 3 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"/>
+                    </svg>
+                </div>
+                <p class="font-semibold mb-1" style="color: #1B4332;">No upcoming tickets</p>
+                <p class="text-sm mb-5" style="color: #6B7B73;">Find your next event and grab a ticket</p>
+                <a href="{% url 'events:list' %}" class="btn-primary px-6 py-2.5">Browse Events</a>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- ── Wishlist ── -->
+    <section>
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="font-display text-xl font-bold" style="color: #1B4332;">Wishlist</h2>
+            {% if wishlist %}
+                <span class="badge-gold">{{ wishlist.count }} saved</span>
+            {% endif %}
+        </div>
+
+        {% if wishlist %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for item in wishlist %}
+                    <div class="card overflow-hidden group">
+                        {% if item.event.banner %}
+                            <div class="h-36 overflow-hidden">
+                                <img src="{{ item.event.banner.url }}" alt="{{ item.event.title }}"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            </div>
+                        {% else %}
+                            <div class="h-36 flex items-center justify-center"
+                                style="background: linear-gradient(135deg, #4A3200, #A67C00);">
+                                <svg class="w-8 h-8 opacity-30" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+                                </svg>
+                            </div>
+                        {% endif %}
+                        <div class="p-4">
+                            <h3 class="font-semibold mb-1 truncate" style="color: #1B4332;">{{ item.event.title }}</h3>
+                            <p class="text-xs mb-3" style="color: #6B7B73;">
+                                {{ item.event.start_datetime|date:"M d, Y" }}
+                            </p>
+                            <div class="flex gap-2">
+                                <a href="{% url 'events:detail' item.event.slug %}"
+                                    class="btn-primary flex-1 py-1.5 text-xs text-center">
+                                    View
+                                </a>
+                                <form method="post" action="{% url 'dashboard:wishlist_toggle' %}" class="flex-1">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="event_id" value="{{ item.event.pk }}">
+                                    <button type="submit"
+                                        class="w-full py-1.5 text-xs font-medium rounded-lg transition"
+                                        style="background: #FEE2E2; color: #991B1B;">
+                                        Remove
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="card p-12 text-center">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background: #FFF8E7;">
+                    <svg class="w-7 h-7" fill="none" stroke="#D4A017" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+                    </svg>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="bg-serene-50 rounded-xl p-12 text-center">
-            <p class="text-serene-700 text-lg mb-6">No tickets yet. Browse events and get your tickets!</p>
-            <a href="{% url 'events:list' %}" class="inline-block px-8 py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition">
-                Browse Events
-            </a>
-        </div>
-    {% endif %}
+                <p class="font-semibold mb-1" style="color: #1B4332;">Your wishlist is empty</p>
+                <p class="text-sm mb-5" style="color: #6B7B73;">Save events you're interested in to find them later</p>
+                <a href="{% url 'events:list' %}" class="btn-primary px-6 py-2.5">Browse Events</a>
+            </div>
+        {% endif %}
+    </section>
+
 </div>
 
 {% endblock %}

@@ -1,22 +1,24 @@
 {% extends "base.html" %}
-{% block title %}Hostify - Host & Manage Events{% endblock %}
+{% block title %}Hostify — Host & Manage Events{% endblock %}
 {% block content %}
 
-<div class="bg-gradient-to-r from-serene-200 to-serene-300 text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-5xl font-bold mb-4">Welcome to Hostify</h1>
-        <p class="text-xl text-serene-100 mb-8">Host and Manage your events or participate in events</p>
-        <a href="{% url 'events:list' %}" class="inline-block px-8 py-4 bg-white text-serene-600 font-bold rounded-lg hover:bg-serene-100 transition transform hover:scale-105">
+<!-- Hero -->
+<div class="relative overflow-hidden" style="background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%);">
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 80%, #EFC132 0%, transparent 50%), radial-gradient(circle at 80% 20%, #74C69D 0%, transparent 50%);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <h1 class="page-title text-white text-5xl mb-4">Welcome to Hostify</h1>
+        <p class="text-forest-200 text-xl mb-8" style="color: #B7E4C7;">Host and manage your events, or discover what's happening near you.</p>
+        <a href="{% url 'events:list' %}" class="btn-primary text-lg px-8 py-4">
             Browse All Events
         </a>
     </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    
+
     {% if recommended %}
         <section class="mb-20">
-            <h2 class="text-4xl font-bold text-serene-900 mb-8 pb-4 border-b-4 border-serene-300">Recommended for You</h2>
+            <h2 class="font-display text-3xl font-bold mb-8 pb-4 border-b-2 border-gold-200" style="color: #1B4332;">Recommended for You</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {% for event in recommended %}
                     {% include "components/event_card.html" %}
@@ -26,17 +28,18 @@
     {% endif %}
 
     <section>
-        <h2 class="text-4xl font-bold text-serene-900 mb-8 pb-4 border-b-4 border-serene-300">Upcoming Events</h2>
+        <h2 class="font-display text-3xl font-bold mb-8 pb-4 border-b-2 border-gold-200" style="color: #1B4332;">Upcoming Events</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for event in upcoming %}
                 {% include "components/event_card.html" %}
             {% empty %}
-                <div class="col-span-full bg-serene-100 rounded-lg p-12 text-center">
-                    <p class="text-serene-700 text-lg">No upcoming events at the moment. Check back soon!</p>
+                <div class="col-span-full rounded-xl p-12 text-center" style="background: #F0EBE1;">
+                    <p class="text-lg" style="color: #2D6A4F;">No upcoming events at the moment. Check back soon!</p>
                 </div>
             {% endfor %}
         </div>
     </section>
+
 </div>
 
 {% endblock %}

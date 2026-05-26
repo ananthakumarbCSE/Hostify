@@ -1,37 +1,92 @@
 {% extends "dashboard/base_dashboard.html" %}
-{% block title %}Event History{% endblock %}
+{% block dashboard_title %}Event History{% endblock %}
+{% block dashboard_heading %}Event History{% endblock %}
+{% block dashboard_subheading %}Events you've attended in the past{% endblock %}
+
 {% block dashboard_content %}
 
-<div class="p-8">
-    <h1 class="text-4xl font-bold text-serene-900 mb-8">Event History</h1>
+<div class="space-y-6">
 
-    {% if past_events %}
+    <div class="flex items-center justify-between">
+        {% if past_tickets %}
+            <p class="text-sm" style="color: #6B7B73;">{{ past_tickets.count }} event{{ past_tickets.count|pluralize }} attended</p>
+        {% else %}
+            <p class="text-sm" style="color: #6B7B73;">No history yet</p>
+        {% endif %}
+    </div>
+
+    {% if past_tickets %}
         <div class="space-y-4">
-            {% for event in past_events %}
-                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition border-l-4 border-serene-200">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold text-serene-900 mb-2">{{ event.title }}</h3>
-                            <p class="text-serene-600 text-sm mb-4">
-                                {{ event.start_datetime|date:"F d, Y" }} at {{ event.start_datetime|time:"g:i A" }}
-                            </p>
-                            <div class="flex gap-2">
-                                <span class="bg-serene-100 text-serene-700 px-3 py-1 rounded-full text-xs font-semibold">{{ event.get_category_display }}</span>
-                                <span class="bg-serene-100 text-serene-700 px-3 py-1 rounded-full text-xs font-semibold">{{ event.get_mode_display }}</span>
-                            </div>
+            {% for ticket in past_tickets %}
+            <div class="card overflow-hidden border-l-4" style="border-left-color: #B7E4C7;">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-0">
+
+                    <!-- Thumbnail -->
+                    {% if ticket.tier.event.banner %}
+                        <div class="md:col-span-1 h-32 md:h-auto overflow-hidden">
+                            <img src="{{ ticket.tier.event.banner.url }}" alt="{{ ticket.tier.event.title }}"
+                                class="w-full h-full object-cover opacity-80">
                         </div>
-                        <a href="{% url 'events:detail' event.slug %}" class="px-6 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 transition font-medium">
-                            View
+                    {% else %}
+                        <div class="md:col-span-1 h-32 md:h-auto flex items-center justify-center"
+                            style="background: #E8E3DA;">
+                            <svg class="w-8 h-8" fill="none" stroke="#6B7B73" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                            </svg>
+                        </div>
+                    {% endif %}
+
+                    <!-- Info -->
+                    <div class="md:col-span-2 p-6">
+                        <h3 class="font-display text-lg font-bold mb-1" style="color: #1B4332;">
+                            {{ ticket.tier.event.title }}
+                        </h3>
+                        <p class="text-sm mb-3" style="color: #6B7B73;">
+                            {{ ticket.tier.event.start_datetime|date:"F d, Y" }} &bull; {{ ticket.tier.event.start_datetime|time:"g:i A" }}
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="badge-muted">{{ ticket.tier.event.get_category_display }}</span>
+                            <span class="badge-muted">{{ ticket.tier.event.get_mode_display }}</span>
+                            <span class="badge-green">Attended</span>
+                        </div>
+                    </div>
+
+                    <!-- Ticket details + action -->
+                    <div class="md:col-span-1 flex flex-col justify-center gap-3 p-6" style="border-left: 1px solid #E8E3DA;">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Ticket</p>
+                            <p class="text-sm font-medium" style="color: #2C3E35;">{{ ticket.tier.name }}</p>
+                        </div>
+                        {% if ticket.price_paid is not None %}
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Paid</p>
+                            <p class="font-display font-bold" style="color: #D4A017;">₹{{ ticket.price_paid }}</p>
+                        </div>
+                        {% endif %}
+                        <a href="{% url 'events:detail' ticket.tier.event.slug %}"
+                            class="btn-outline py-2 text-sm text-center mt-1">
+                            View Event
                         </a>
                     </div>
+
                 </div>
+            </div>
             {% endfor %}
         </div>
+
     {% else %}
-        <div class="bg-serene-50 rounded-xl p-12 text-center">
-            <p class="text-serene-700 text-lg">No past events yet. Attend events to build your history!</p>
+        <div class="card p-16 text-center">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background: #F0EBE1;">
+                <svg class="w-7 h-7" fill="none" stroke="#2D6A4F" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <p class="font-semibold mb-1" style="color: #1B4332;">No past events yet</p>
+            <p class="text-sm mb-5" style="color: #6B7B73;">Attend events to build your history</p>
+            <a href="{% url 'events:list' %}" class="btn-primary px-6 py-2.5">Browse Events</a>
         </div>
     {% endif %}
+
 </div>
 
 {% endblock %}

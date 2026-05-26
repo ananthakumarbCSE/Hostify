@@ -1,9 +1,106 @@
-<div>
-    <p>Event: {{ ticket.tier.event.title }}</p>
-    <p>Tier: {{ ticket.tier.name }}</p>
-    <p>Status: {{ ticket.status }}</p>
-    <p>Issued: {{ ticket.issued_at }}</p>
-    {% if ticket.qr_code %}
-        <img src="{{ ticket.qr_code.url }}" alt="QR Code">
+<div style="background:#FDFCF9; border:1px solid #E8E3DA; border-radius:.875rem; overflow:hidden;
+            display:flex; flex-direction:column; box-shadow:0 1px 3px rgba(27,67,50,0.06);">
+
+    <!-- Top stripe with event color -->
+    <div style="height:4px; background: linear-gradient(90deg, #1B4332 0%, #40916C 60%, #D4A017 100%);"></div>
+
+    <!-- Main content -->
+    <div style="display:flex; gap:0; flex:1;">
+
+        <!-- QR / Left section -->
+        <div style="padding:1.25rem 1rem; display:flex; flex-direction:column; align-items:center; justify-content:center;
+                    border-right:1px dashed #D6D0C8; min-width:100px;">
+            {% if ticket.qr_code %}
+                <img src="{{ ticket.qr_code.url }}" alt="QR Code"
+                     style="width:80px; height:80px; border-radius:.375rem; display:block;">
+            {% else %}
+                <div style="width:80px; height:80px; border-radius:.375rem; background:#F0EBE1;
+                            display:flex; align-items:center; justify-content:center; border:1px dashed #D6D0C8;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="color:#9BA9A0;">
+                        <rect x="3" y="3" width="10" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="19" y="3" width="10" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="19" width="10" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="6" y="6" width="4" height="4" rx=".5" fill="currentColor"/>
+                        <rect x="22" y="6" width="4" height="4" rx=".5" fill="currentColor"/>
+                        <rect x="6" y="22" width="4" height="4" rx=".5" fill="currentColor"/>
+                        <path d="M19 19h4M23 19v4M19 23h4M27 23v4M27 19v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            {% endif %}
+            <p style="font-size:.6rem; color:#9BA9A0; margin:.5rem 0 0; letter-spacing:.06em; text-transform:uppercase;">Scan QR</p>
+        </div>
+
+        <!-- Ticket info -->
+        <div style="padding:1.1rem 1.25rem; flex:1; min-width:0;">
+
+            <!-- Status badge -->
+            <div style="margin-bottom:.6rem;">
+                {% if ticket.status == 'confirmed' %}
+                    <span class="badge-green">Confirmed</span>
+                {% elif ticket.status == 'pending' %}
+                    <span class="badge-gold">Pending</span>
+                {% elif ticket.status == 'cancelled' %}
+                    <span class="badge-muted" style="background:#FEF2F2; color:#991B1B;">Cancelled</span>
+                {% else %}
+                    <span class="badge-muted">{{ ticket.status|title }}</span>
+                {% endif %}
+
+                {% if ticket.checked_in %}
+                    <span class="badge-muted" style="margin-left:.3rem; background:#F0EBE1; color:#6B7B73;">Checked In</span>
+                {% endif %}
+            </div>
+
+            <!-- Event name -->
+            <h4 style="font-family:'Playfair Display',serif; font-size:.975rem; font-weight:600;
+                       color:#1B4332; line-height:1.3; margin:0 0 .5rem;
+                       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                {{ ticket.tier.event.title }}
+            </h4>
+
+            <!-- Tier name -->
+            <p style="font-size:.78rem; font-weight:600; color:#2D6A4F; margin:0 0 .6rem;">
+                {{ ticket.tier.name }}
+            </p>
+
+            <!-- Meta rows -->
+            <div style="display:flex; flex-direction:column; gap:.3rem;">
+                <div style="display:flex; align-items:center; gap:.4rem; font-size:.75rem; color:#6B7B73;">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;">
+                        <rect x="1" y="2" width="10" height="8.5" rx="1.1" stroke="currentColor" stroke-width="1.1"/>
+                        <path d="M3.5 1v2.5M8.5 1v2.5M1 5h10" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                    </svg>
+                    {{ ticket.tier.event.start_datetime|date:"M d, Y · g:i A" }}
+                </div>
+
+                {% if ticket.tier.event.venue_city %}
+                <div style="display:flex; align-items:center; gap:.4rem; font-size:.75rem; color:#6B7B73;">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;">
+                        <path d="M6 1C4.343 1 3 2.343 3 4c0 2.5 3 7 3 7s3-4.5 3-7c0-1.657-1.343-3-3-3z" stroke="currentColor" stroke-width="1.1"/>
+                        <circle cx="6" cy="4" r="1.1" stroke="currentColor" stroke-width="1.1"/>
+                    </svg>
+                    {{ ticket.tier.event.venue_city }}
+                </div>
+                {% endif %}
+
+                <div style="display:flex; align-items:center; gap:.4rem; font-size:.75rem; color:#9BA9A0;">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;">
+                        <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.1"/>
+                        <path d="M6 3.5V6l1.5 1.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Issued {{ ticket.issued_at|date:"M d, Y" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Price paid footer -->
+    {% if ticket.price_paid is not None %}
+    <div style="padding:.6rem 1.25rem; background:#F8F5F0; border-top:1px solid #E8E3DA;
+                display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-size:.72rem; color:#9BA9A0; letter-spacing:.04em; text-transform:uppercase;">Amount Paid</span>
+        <span style="font-family:'Playfair Display',serif; font-size:.9rem; font-weight:700; color:#1B4332;">
+            {% if ticket.price_paid == 0 %}Free{% else %}₹{{ ticket.price_paid }}{% endif %}
+        </span>
+    </div>
     {% endif %}
 </div>

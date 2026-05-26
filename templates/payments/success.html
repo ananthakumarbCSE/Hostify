@@ -1,59 +1,70 @@
 {% extends "base.html" %}
-{% block title %}Payment Successful{% endblock %}
+{% block title %}Payment Successful — Hostify{% endblock %}
 {% block content %}
 
-<div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-serene-50 flex items-center justify-center py-12">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 page-fade-in" style="background: #F8F5F0;">
     <div class="max-w-md w-full">
-        
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-            
-            <!-- Success Icon -->
-            <div class="bg-gradient-to-r from-green-400 to-green-500 px-8 py-12 text-center">
-                <div class="text-6xl mb-4">✓</div>
-                <h1 class="text-3xl font-bold text-white mb-2">Payment Successful</h1>
-                <p class="text-green-100">Your tickets have been confirmed</p>
+
+        <div class="card overflow-hidden">
+
+            <!-- Success Header -->
+            <div class="px-8 py-12 text-center" style="background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%);">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(239,193,50,0.2); border: 2px solid #EFC132;">
+                    <svg class="w-10 h-10" fill="none" stroke="#EFC132" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <h1 class="font-display text-3xl font-bold text-white mb-2">Payment Successful</h1>
+                <p style="color: #B7E4C7;">Your tickets have been confirmed</p>
             </div>
 
             <!-- Details -->
             <div class="px-8 py-8 space-y-6">
-                
-                <div class="bg-serene-50 rounded-lg p-4">
-                    <p class="text-serene-600 text-sm font-semibold">Order ID</p>
-                    <p class="text-serene-900 font-bold text-lg">{{ order.id }}</p>
-                </div>
 
-                <div class="border-t-2 border-serene-200 pt-6">
-                    <p class="text-serene-600 font-semibold mb-4">What happens next?</p>
-                    <ul class="space-y-3 text-serene-700 text-sm">
-                        <li class="flex items-start">
-                            <span class="text-green-500 font-bold mr-3">1.</span>
+                {% if order %}
+                <div class="rounded-lg p-4" style="background: #F0EBE1;">
+                    <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Order ID</p>
+                    <p class="font-bold text-lg" style="color: #1B4332;">#{{ order.id }}</p>
+                    {% if order.event %}
+                        <p class="text-sm mt-1" style="color: #2D6A4F;">{{ order.event.title }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="pt-2" style="border-top: 2px solid #E8E3DA;">
+                    <p class="font-semibold mb-4" style="color: #1B4332;">What happens next?</p>
+                    <ul class="space-y-3 text-sm" style="color: #2C3E35;">
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold mt-0.5" style="color: #40916C;">1.</span>
                             <span>Check your email for ticket confirmation</span>
                         </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 font-bold mr-3">2.</span>
-                            <span>Download your QR code tickets</span>
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold mt-0.5" style="color: #40916C;">2.</span>
+                            <span>Download your QR code tickets from your dashboard</span>
                         </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 font-bold mr-3">3.</span>
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold mt-0.5" style="color: #40916C;">3.</span>
                             <span>Present QR codes at event check-in</span>
                         </li>
                     </ul>
                 </div>
 
                 <div class="space-y-3">
-                    <a href="{% url 'dashboard:activity' %}" class="block w-full py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition text-center">
+                    <a href="{% url 'dashboard:activity' %}" class="btn-primary w-full py-3 block text-center">
                         View My Tickets
                     </a>
-                    <a href="{% url 'events:list' %}" class="block w-full py-3 bg-serene-100 text-serene-700 font-bold rounded-lg hover:bg-serene-200 transition text-center">
+                    <a href="{% url 'events:list' %}" class="btn-outline w-full py-3 block text-center">
                         Browse More Events
                     </a>
                 </div>
+
             </div>
         </div>
 
-        <div class="mt-8 text-center text-serene-600 text-sm">
-            <p>Thank you for choosing EventSphere</p>
+        <div class="mt-6 text-center text-sm" style="color: #6B7B73;">
+            Thank you for choosing Hostify
         </div>
+
     </div>
 </div>
 

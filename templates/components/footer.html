@@ -1,28 +1,119 @@
-<footer class="bg-serene-900 text-white mt-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
-            <!-- Brand -->
+<footer style="background:#081C15; color:#95D5B2; margin-top:auto;">
+
+    <!-- Main footer grid -->
+    <div style="max-width:1280px; margin:0 auto; padding:3.5rem 1.5rem 2.5rem;">
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:3rem;"
+             class="footer-grid">
+
+            <!-- Brand column -->
             <div>
-                <div class="flex items-center space-x-2 mb-4">
-                    <div class="w-10 h-10 bg-serene-300 rounded-lg flex items-center justify-center">
-                        <span class="text-serene-900 font-bold">H</span>
+                <div style="display:flex; align-items:center; gap:.65rem; margin-bottom:1rem;">
+                    <div style="width:34px; height:34px; border-radius:.5rem; flex-shrink:0;
+                                background: linear-gradient(135deg, #D4A017 0%, #EFC132 100%);
+                                display:flex; align-items:center; justify-content:center;">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 1L10.5 6H15L11 9.5L12.5 14.5L8 11.5L3.5 14.5L5 9.5L1 6H5.5L8 1Z"
+                                  fill="#1B4332" stroke="#1B4332" stroke-width="0.4" stroke-linejoin="round"/>
+                        </svg>
                     </div>
-                    <span class="text-xl font-bold">Hostify</span>
+                    <span style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:#fff; letter-spacing:-.01em;">
+                        Hostify
+                    </span>
                 </div>
-                <p class="text-serene-300 text-sm">&copy; {% now "Y" %} Hostify. All rights reserved.</p>
+                <p style="font-size:.85rem; line-height:1.65; color:#74C69D; max-width:260px; margin:0 0 1.25rem;">
+                    The modern platform for discovering, creating, and managing events that matter.
+                </p>
+                <!-- Social links -->
+                <div style="display:flex; gap:.6rem;">
+                    <a href="#" style="width:32px; height:32px; border-radius:.4rem; background:rgba(255,255,255,0.07);
+                                       display:flex; align-items:center; justify-content:center; color:#74C69D;
+                                       transition:all .18s; text-decoration:none;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.14)'; this.style.color='#fff'"
+                       onmouseout="this.style.background='rgba(255,255,255,0.07)'; this.style.color='#74C69D'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+                    </a>
+                    <a href="#" style="width:32px; height:32px; border-radius:.4rem; background:rgba(255,255,255,0.07);
+                                       display:flex; align-items:center; justify-content:center; color:#74C69D;
+                                       transition:all .18s; text-decoration:none;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.14)'; this.style.color='#fff'"
+                       onmouseout="this.style.background='rgba(255,255,255,0.07)'; this.style.color='#74C69D'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </a>
+                    <a href="#" style="width:32px; height:32px; border-radius:.4rem; background:rgba(255,255,255,0.07);
+                                       display:flex; align-items:center; justify-content:center; color:#74C69D;
+                                       transition:all .18s; text-decoration:none;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.14)'; this.style.color='#fff'"
+                       onmouseout="this.style.background='rgba(255,255,255,0.07)'; this.style.color='#74C69D'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                    </a>
+                </div>
             </div>
 
-            <!-- Quick Links -->
+            <!-- Quick links -->
             <div>
-                <h3 class="font-bold text-lg mb-4 text-serene-200">Links</h3>
-                <ul class="space-y-2">
-                    <li><a href="/" class="text-serene-300 hover:text-white transition">Home</a></li>
-                    <li><a href="{% url 'events:list' %}" class="text-serene-300 hover:text-white transition">Browse Events</a></li>
+                <h4 style="font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+                           color:#52B788; margin:0 0 1rem;">Explore</h4>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.6rem;">
+                    <li><a href="/" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                           onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">Home</a></li>
+                    <li><a href="{% url 'events:list' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                           onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">Browse Events</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'dashboard:events' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">Dashboard</a></li>
+                        {% if user.is_organizer %}
+                            <li><a href="{% url 'dashboard:create_event' %}" style="font-size:.85rem; color:#D4A017; text-decoration:none; transition:color .15s;"
+                                   onmouseover="this.style.color='#EFC132'" onmouseout="this.style.color='#D4A017'">+ Create Event</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'accounts:login' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">Sign In</a></li>
+                        <li><a href="{% url 'accounts:register' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">Register</a></li>
+                    {% endif %}
                 </ul>
             </div>
 
+            <!-- Account links -->
+            <div>
+                <h4 style="font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+                           color:#52B788; margin:0 0 1rem;">Account</h4>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.6rem;">
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'dashboard:profile' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">My Profile</a></li>
+                        <li><a href="{% url 'dashboard:notifications' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">Notifications</a></li>
+                        <li><a href="{% url 'dashboard:activity' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none; transition:color .15s;"
+                               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#74C69D'">My Tickets</a></li>
+                        <li><a href="{% url 'accounts:logout' %}" style="font-size:.85rem; color:#FCA5A5; text-decoration:none; transition:color .15s;"
+                               onmouseover="this.style.color='#FEE2E2'" onmouseout="this.style.color='#FCA5A5'">Sign Out</a></li>
+                    {% else %}
+                        <li><a href="{% url 'accounts:login' %}" style="font-size:.85rem; color:#74C69D; text-decoration:none;">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-        
+    </div>
+
+    <!-- Bottom bar -->
+    <div style="border-top:1px solid rgba(255,255,255,0.07); padding:1.1rem 1.5rem;">
+        <div style="max-width:1280px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.5rem;">
+            <p style="font-size:.78rem; color:#52B788; margin:0;">
+                &copy; {% now "Y" %} Hostify. All rights reserved.
+            </p>
+            <p style="font-size:.78rem; color:#40916C; margin:0;">
+                Built with care for event communities.
+            </p>
+        </div>
     </div>
 </footer>
+
+<style>
+@media (max-width: 640px) {
+    .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+}
+</style>

@@ -1,13 +1,60 @@
 {% extends "base.html" %}
+{% block title %}{% block dashboard_title %}Dashboard{% endblock %} — Hostify{% endblock %}
+
 {% block content %}
 
-<div class="flex bg-serene-50 min-h-screen">
+<div class="flex min-h-screen" style="background: #F8F5F0;">
+
+    <!-- Sidebar -->
     {% include "components/sidebar.html" %}
-    
-    <div class="flex-1 overflow-auto">
-        <div class="max-w-6xl mx-auto">
+
+    <!-- Main Content Area -->
+    <div class="flex-1 min-w-0 overflow-auto">
+
+        <!-- Top Bar -->
+        <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b" style="background: #FDFCF9; border-color: #E8E3DA;">
+            <div>
+                <h2 class="font-display font-bold text-lg" style="color: #1B4332;">
+                    {% block dashboard_heading %}Dashboard{% endblock %}
+                </h2>
+                <p class="text-xs mt-0.5" style="color: #6B7B73;">
+                    {% block dashboard_subheading %}Welcome back, {{ user.get_full_name|default:user.username }}{% endblock %}
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Notification Bell -->
+                <a href="{% url 'dashboard:notifications' %}" class="relative p-2 rounded-lg transition hover:opacity-80" style="background: #F0EBE1;">
+                    <svg class="w-5 h-5" fill="none" stroke="#2D6A4F" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                    {% if unread_notifications %}
+                        <span class="notif-dot absolute -top-0.5 -right-0.5"></span>
+                    {% endif %}
+                </a>
+
+                <!-- Profile Avatar -->
+                <a href="{% url 'dashboard:profile' %}" class="flex items-center gap-2 rounded-lg px-3 py-1.5 transition hover:opacity-80" style="background: #F0EBE1;">
+                    {% if user.photo %}
+                        <img src="{{ user.photo.url }}" class="w-7 h-7 rounded-full object-cover" alt="{{ user.username }}">
+                    {% else %}
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background: #2D6A4F;">
+                            {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                    <span class="text-sm font-medium hidden sm:block" style="color: #1B4332;">{{ user.get_full_name|default:user.username }}</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% include "components/messages.html" %}
+
+        <!-- Page Content -->
+        <div class="p-6 lg:p-8">
             {% block dashboard_content %}{% endblock %}
         </div>
+
     </div>
 </div>
 

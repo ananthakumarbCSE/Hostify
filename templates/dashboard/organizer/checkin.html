@@ -1,93 +1,337 @@
 {% extends "dashboard/base_dashboard.html" %}
-{% block title %}Event Check-in - {{ event.title }}{% endblock %}
+{% block title %}Check-in — {{ event.title }}{% endblock %}
+
+{% block dashboard_heading %}Check-in Panel{% endblock %}
+{% block dashboard_subheading %}{{ event.title }}{% endblock %}
+
 {% block dashboard_content %}
+<div class="page-fade-in p-6 md:p-8 space-y-8">
 
-<div class="p-8">
-    <h1 class="text-4xl font-bold text-serene-900 mb-2">Event Check-in</h1>
-    <p class="text-serene-600 mb-8">{{ event.title }}</p>
+  {# ── Back link ── #}
+  <a href="{% url 'dashboard:event_manage' event.id %}"
+     class="inline-flex items-center gap-2 text-sm font-medium transition-colors"
+     style="color:#52B788" onmouseover="this.style.color='#1B4332'" onmouseout="this.style.color='#52B788'">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+    Back to Event
+  </a>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- QR Scanner -->
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-xl shadow-md p-8">
-                <h2 class="text-2xl font-bold text-serene-900 mb-6">Scan QR Code</h2>
-                
-                <div class="bg-serene-100 rounded-lg p-12 text-center mb-6">
-                    <div id="qr-reader" style="width: 100%;"></div>
-                </div>
+  {# ── Stat Cards ── #}
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-                <div id="qr-result" class="hidden bg-green-50 border-l-4 border-green-400 p-4 rounded mb-6">
-                    <p class="text-green-800 font-semibold">Ticket Verified</p>
-                    <p id="result-text" class="text-green-700"></p>
-                </div>
-
-                <form method="post" id="checkin-form" class="space-y-4">
-                    {% csrf_token %}
-                    <input type="hidden" id="qr-data" name="qr_code">
-                    <button type="submit" class="w-full py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition">
-                        Confirm Check-in
-                    </button>
-                </form>
-            </div>
+    <div class="stat-card">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="stat-label">Registered</p>
+          <p class="stat-number">{{ total_registered }}</p>
         </div>
-
-        <!-- Stats Sidebar -->
-        <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <p class="text-serene-600 text-sm font-semibold mb-2">Checked In</p>
-                <p class="text-4xl font-bold text-green-600">{{ checked_in_count }}</p>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <p class="text-serene-600 text-sm font-semibold mb-2">Pending</p>
-                <p class="text-4xl font-bold text-serene-600">{{ pending_count }}</p>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <p class="text-serene-600 text-sm font-semibold mb-2">Check-in Rate</p>
-                <p class="text-4xl font-bold text-serene-600">{{ checkin_rate }}%</p>
-            </div>
-        </div>
+        <span class="p-2 rounded-lg" style="background:#D8F3DC">
+          <svg class="w-5 h-5" style="color:#1B4332" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+          </svg>
+        </span>
+      </div>
     </div>
 
-    <!-- Recent Check-ins -->
-    <div class="bg-white rounded-xl shadow-md p-8 mt-8">
-        <h2 class="text-2xl font-bold text-serene-900 mb-6">Recent Check-ins</h2>
-        
-        <div class="space-y-3">
-            {% for checkin in recent_checkins %}
-                <div class="flex items-center justify-between p-4 bg-serene-50 rounded-lg border-l-4 border-green-400">
-                    <div>
-                        <p class="font-semibold text-serene-900">{{ checkin.user.get_full_name }}</p>
-                        <p class="text-sm text-serene-600">{{ checkin.checked_in_at|time:"g:i A" }}</p>
-                    </div>
-                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Checked In</span>
-                </div>
-            {% endfor %}
+    <div class="stat-card">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="stat-label">Checked In</p>
+          <p class="stat-number" id="stat-checked">{{ total_checked }}</p>
         </div>
+        <span class="p-2 rounded-lg" style="background:#D8F3DC">
+          <svg class="w-5 h-5" style="color:#1B4332" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </span>
+      </div>
+      {% if total_registered > 0 %}
+      <div class="mt-3">
+        <div class="w-full rounded-full h-1.5" style="background:#E2E8F0">
+          <div id="checkin-bar" class="h-1.5 rounded-full transition-all duration-500"
+               style="background:#52B788; width:{% widthratio total_checked total_registered 100 %}%"></div>
+        </div>
+        <p class="text-xs mt-1" style="color:#6B7B73">
+          <span id="stat-rate">{% widthratio total_checked total_registered 100 %}</span>% attendance
+        </p>
+      </div>
+      {% endif %}
     </div>
+
+    <div class="stat-card">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="stat-label">Still Pending</p>
+          <p class="stat-number" id="stat-pending">{{ total_registered|add:"-"|add:total_checked }}</p>
+        </div>
+        <span class="p-2 rounded-lg" style="background:#FFF8E7">
+          <svg class="w-5 h-5" style="color:#92400E" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  {# ── Main Grid ── #}
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+    {# ── QR Scanner Panel ── #}
+    <div class="lg:col-span-3 card space-y-5">
+      <div class="flex items-center justify-between">
+        <h2 class="font-display text-lg font-semibold" style="color:#081C15">Scan QR Code</h2>
+        <span id="scanner-status-badge" class="badge-muted">Ready</span>
+      </div>
+
+      {# Scanner viewport #}
+      <div class="rounded-xl overflow-hidden relative" style="background:#081C15; min-height:260px">
+        <div id="qr-reader" class="w-full"></div>
+        {# Overlay corner guides #}
+        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <div class="relative w-48 h-48">
+            <span class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl" style="border-color:#52B788"></span>
+            <span class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-tr" style="border-color:#52B788"></span>
+            <span class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-bl" style="border-color:#52B788"></span>
+            <span class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-br" style="border-color:#52B788"></span>
+          </div>
+        </div>
+      </div>
+
+      {# Result toast #}
+      <div id="scan-result" class="hidden rounded-xl p-4 border" role="alert">
+        <div class="flex items-start gap-3">
+          <div id="result-icon" class="flex-shrink-0 mt-0.5">
+            <!-- filled by JS -->
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="result-title" class="font-semibold text-sm"></p>
+            <p id="result-body" class="text-sm mt-0.5"></p>
+          </div>
+        </div>
+      </div>
+
+      {# Manual token entry #}
+      <div class="divider"></div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#6B7B73">Manual Token Entry</p>
+        <div class="flex gap-2">
+          <input id="manual-token" type="text" placeholder="Paste ticket token…"
+                 class="input-field flex-1 text-sm font-mono"
+                 autocomplete="off" spellcheck="false">
+          <button onclick="submitToken(document.getElementById('manual-token').value.trim())"
+                  class="btn-outline text-sm px-4">
+            Check In
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {# ── Recent Check-ins ── #}
+    <div class="lg:col-span-2 card flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-display text-lg font-semibold" style="color:#081C15">Recent Check-ins</h2>
+        <span class="badge-green" id="recent-count">{{ recent_checkins|length }}</span>
+      </div>
+
+      <div id="recent-list" class="flex-1 space-y-2 overflow-y-auto" style="max-height:480px">
+        {% for ticket in recent_checkins %}
+        <div class="card-flat flex items-center justify-between gap-3 py-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                 style="background:#D8F3DC; color:#1B4332">
+              {{ ticket.attendee.get_full_name|slice:":1"|upper }}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium truncate" style="color:#081C15">
+                {{ ticket.attendee.get_full_name }}
+              </p>
+              <p class="text-xs" style="color:#6B7B73">{{ ticket.tier.name }}</p>
+            </div>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <span class="badge-green text-xs">✓ In</span>
+            {% if ticket.checkin.scanned_at %}
+            <p class="text-xs mt-0.5" style="color:#6B7B73">{{ ticket.checkin.scanned_at|time:"g:i A" }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% empty %}
+        <div id="empty-state" class="text-center py-10">
+          <svg class="w-10 h-10 mx-auto mb-3" style="color:#6B7B73" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm" style="color:#6B7B73">No check-ins yet.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+{# ── QR + Fetch JS ── #}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
-    const scanner = new Html5QrcodeScanner('qr-reader', {
-        fps: 10,
-        qrbox: 250,
-        rememberLastUsedCamera: true,
-    });
+  const SCAN_URL   = "{% url 'dashboard:checkin_scan' %}";
+  const CSRF_TOKEN = "{{ csrf_token }}";
+  const TOTAL_REG  = {{ total_registered }};
 
-    scanner.render((decodedText, decodedResult) => {
-        document.getElementById('qr-data').value = decodedText;
-        document.getElementById('result-text').textContent = 'ID: ' + decodedText;
-        document.getElementById('qr-result').classList.remove('hidden');
-        
-        setTimeout(() => {
-            document.getElementById('checkin-form').submit();
-        }, 1000);
-    }, (error) => {
-        console.log('QR Error:', error);
-    });
+  let scanLocked = false;
+
+  // ── Scanner init ──
+  const scanner = new Html5QrcodeScanner("qr-reader", {
+    fps: 10,
+    qrbox: { width: 220, height: 220 },
+    rememberLastUsedCamera: true,
+    aspectRatio: 1.0,
+  });
+
+  scanner.render(
+    (decodedText) => {
+      if (scanLocked) return;
+      scanLocked = true;
+      submitToken(decodedText);
+    },
+    (err) => { /* silent scan errors */ }
+  );
+
+  // ── Submit token via fetch ──
+  async function submitToken(token) {
+    if (!token) {
+      showResult(false, "Empty token", "Please enter or scan a valid QR code.");
+      scanLocked = false;
+      return;
+    }
+
+    setBadge("Scanning…", "#FFF8E7", "#92400E");
+
+    try {
+      const res  = await fetch(SCAN_URL, {
+        method:  "POST",
+        headers: {
+          "Content-Type":     "application/json",
+          "X-CSRFToken":      CSRF_TOKEN,
+        },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        showResult(true,
+          "✓ Checked in — " + data.attendee,
+          data.tier + " · " + data.event
+        );
+        setBadge("Checked In", "#D8F3DC", "#1B4332");
+        prependRecentItem(data.attendee, data.tier);
+        updateStats();
+        document.getElementById("manual-token").value = "";
+      } else {
+        showResult(false,
+          data.error || "Check-in failed",
+          data.attendee ? "Attendee: " + data.attendee : ""
+        );
+        setBadge("Failed", "#FEE2E2", "#991B1B");
+      }
+    } catch (e) {
+      showResult(false, "Network error", "Could not reach the server.");
+      setBadge("Error", "#FEE2E2", "#991B1B");
+    }
+
+    // Unlock scanner after 3 s
+    setTimeout(() => {
+      scanLocked = false;
+      setBadge("Ready", "#F1F5F9", "#475569");
+    }, 3000);
+  }
+
+  // ── UI helpers ──
+  function showResult(ok, title, body) {
+    const el    = document.getElementById("scan-result");
+    const icon  = document.getElementById("result-icon");
+    const tEl   = document.getElementById("result-title");
+    const bEl   = document.getElementById("result-body");
+
+    el.className = "rounded-xl p-4 border";
+    if (ok) {
+      el.style.cssText = "background:#F0FFF4; border-color:#52B788";
+      icon.innerHTML   = svgCheck("#1B4332");
+      tEl.style.color  = "#1B4332";
+      bEl.style.color  = "#2D6A4F";
+    } else {
+      el.style.cssText = "background:#FFF5F5; border-color:#FECACA";
+      icon.innerHTML   = svgX("#991B1B");
+      tEl.style.color  = "#991B1B";
+      bEl.style.color  = "#B91C1C";
+    }
+    tEl.textContent = title;
+    bEl.textContent = body;
+    el.classList.remove("hidden");
+  }
+
+  function setBadge(label, bg, color) {
+    const b = document.getElementById("scanner-status-badge");
+    b.textContent   = label;
+    b.style.background = bg;
+    b.style.color      = color;
+  }
+
+  function prependRecentItem(name, tier) {
+    const list  = document.getElementById("recent-list");
+    const empty = document.getElementById("empty-state");
+    if (empty) empty.remove();
+
+    const initial = name.charAt(0).toUpperCase();
+    const now     = new Date().toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
+
+    const div = document.createElement("div");
+    div.className = "card-flat flex items-center justify-between gap-3 py-3 animate-pulse-once";
+    div.innerHTML = `
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+             style="background:#D8F3DC; color:#1B4332">${initial}</div>
+        <div class="min-w-0">
+          <p class="text-sm font-medium truncate" style="color:#081C15">${name}</p>
+          <p class="text-xs" style="color:#6B7B73">${tier}</p>
+        </div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <span class="badge-green text-xs">✓ In</span>
+        <p class="text-xs mt-0.5" style="color:#6B7B73">${now}</p>
+      </div>`;
+    list.prepend(div);
+
+    // Update recent count badge
+    const countBadge = document.getElementById("recent-count");
+    countBadge.textContent = parseInt(countBadge.textContent || 0) + 1;
+  }
+
+  let currentChecked = {{ total_checked }};
+  function updateStats() {
+    currentChecked++;
+    document.getElementById("stat-checked").textContent = currentChecked;
+    document.getElementById("stat-pending").textContent = Math.max(0, TOTAL_REG - currentChecked);
+    if (TOTAL_REG > 0) {
+      const pct = Math.round((currentChecked / TOTAL_REG) * 100);
+      document.getElementById("stat-rate").textContent   = pct;
+      document.getElementById("checkin-bar").style.width = pct + "%";
+    }
+  }
+
+  // ── Icon SVGs ──
+  function svgCheck(color) {
+    return `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>`;
+  }
+  function svgX(color) {
+    return `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>`;
+  }
 </script>
 
 {% endblock %}

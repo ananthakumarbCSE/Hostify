@@ -1,53 +1,119 @@
-<nav class="bg-white shadow-md border-b-4 border-serene-300">
+<nav class="navbar-glass sticky top-0 z-50" style="box-shadow: 0 1px 0 rgba(255,255,255,0.08);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
-            
-            <a href="/" class="flex items-center space-x-2 group">
-                <div class="w-10 h-10 bg-serene-300 rounded-lg flex items-center justify-center group-hover:bg-serene-400 transition">
-                    <span class="text-white font-bold text-lg">H</span>
+        <div class="flex justify-between items-center h-16">
+
+            <!-- Brand -->
+            <a href="/" class="flex items-center gap-2.5 group">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                     style="background: linear-gradient(135deg, #D4A017 0%, #EFC132 100%);">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1L10.5 6H15L11 9.5L12.5 14.5L8 11.5L3.5 14.5L5 9.5L1 6H5.5L8 1Z"
+                              fill="#1B4332" stroke="#1B4332" stroke-width="0.5" stroke-linejoin="round"/>
+                    </svg>
                 </div>
-                <span class="text-xl font-bold text-serene-900 hidden sm:inline">Hostify</span>
+                <span class="brand-wordmark text-white text-xl">Hostify</span>
             </a>
 
-    
-            <div class="hidden md:flex space-x-8">
-                <a href="{% url 'events:list' %}" class="text-serene-700 hover:text-serene-600 font-medium transition">
-                    Browse Events
-                </a>
-            </div>
-
-    
-            <div class="flex items-center space-x-4">
+            <!-- Desktop nav links -->
+            <div class="hidden md:flex items-center gap-7">
+                <a href="{% url 'events:list' %}" class="nav-link">Browse Events</a>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'dashboard:events' %}" class="hidden md:inline-block text-serene-700 hover:text-serene-600 font-medium">
-                        Dashboard
-                    </a>
-                    
-                    <div class="relative group">
-                        <button class="px-4 py-2 bg-serene-100 text-serene-900 rounded-lg hover:bg-serene-200 font-medium text-sm">
-                            {{ user.get_full_name }}
-                        </button>
-                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition">
-                            <a href="{% url 'dashboard:profile' %}" class="block px-4 py-2 text-serene-700 hover:bg-serene-50 rounded-t-lg">Profile</a>
-                            <a href="{% url 'dashboard:notifications' %}" class="block px-4 py-2 text-serene-700 hover:bg-serene-50 flex justify-between">
-                                <span>Notifications</span>
-                                {% if unread_notifications %}<span class="bg-serene-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">{{ unread_notifications }}</span>{% endif %}
-                            </a>
-                            <a href="{% url 'accounts:logout' %}" class="block px-4 py-2 text-serene-700 hover:bg-serene-50 rounded-b-lg">Logout</a>
-                        </div>
-                    </div>
-                    
-                    {% include "components/notification_badge.html" %}
-
-                {% else %}
-                    <a href="{% url 'accounts:login' %}" class="px-4 py-2 text-serene-700 hover:text-serene-600 font-medium">
-                        Login
-                    </a>
-                    <a href="{% url 'accounts:register' %}" class="px-4 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 font-medium transition">
-                        Register
-                    </a>
+                    <a href="{% url 'dashboard:events' %}" class="nav-link">Dashboard</a>
+                    {% if user.is_organizer %}
+                        <a href="{% url 'dashboard:create_event' %}" class="nav-link">Create Event</a>
+                    {% endif %}
                 {% endif %}
             </div>
+
+            <!-- Right actions -->
+            <div class="flex items-center gap-3">
+                {% if user.is_authenticated %}
+
+                    <!-- Notification bell -->
+                    {% include "components/notification_badge.html" %}
+
+                    <!-- User menu -->
+                    <div class="relative" data-dropdown>
+                        <button onclick="toggleDropdown('user-menu')"
+                                class="flex items-center gap-2 btn-ghost text-sm py-2 px-3">
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-700 flex-shrink-0"
+                                 style="background: #D4A017; color: #1B4332; font-weight: 700;">
+                                {{ user.get_full_name|first|upper }}
+                            </div>
+                            <span class="hidden sm:inline max-w-[110px] truncate">{{ user.get_full_name }}</span>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="opacity:.7; flex-shrink:0;">
+                                <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+
+                        <div id="user-menu" class="dropdown-menu hidden absolute right-0 mt-2">
+                            <div class="px-3 py-2 mb-1" style="border-bottom:1px solid #E8E3DA;">
+                                <p class="text-xs font-600" style="color:#1B4332; font-weight:600;">{{ user.get_full_name }}</p>
+                                <p class="text-xs" style="color:#6B7B73;">{{ user.email }}</p>
+                            </div>
+                            <a href="{% url 'dashboard:profile' %}" class="dropdown-item">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 13c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                My Profile
+                            </a>
+                            <a href="{% url 'dashboard:events' %}" class="dropdown-item">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1.5" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 1.5V4M10 1.5V4M1.5 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                My Events
+                            </a>
+                            {% if user.is_organizer %}
+                            <a href="{% url 'dashboard:create_event' %}" class="dropdown-item">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 4.5v6M4.5 7.5h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                Create Event
+                            </a>
+                            {% endif %}
+                            <div style="height:1px; background:#E8E3DA; margin:0.3rem 0.4rem;"></div>
+                            <a href="{% url 'accounts:logout' %}" class="dropdown-item danger">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M5.5 13H3a1 1 0 01-1-1V3a1 1 0 011-1h2.5M10 10.5L13 7.5M13 7.5L10 4.5M13 7.5H6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Sign Out
+                            </a>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn-ghost text-sm">Sign In</a>
+                    <a href="{% url 'accounts:register' %}" class="btn-primary text-sm">
+                        Get Started
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M7.5 3L11 6.5 7.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                {% endif %}
+
+                <!-- Mobile hamburger -->
+                <button onclick="toggleMobileMenu()" class="md:hidden btn-ghost p-2">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" style="background: #133127; border-top: 1px solid rgba(255,255,255,0.08);">
+        <div class="px-4 py-4 space-y-1">
+            <a href="{% url 'events:list' %}" class="block px-3 py-2.5 rounded-lg text-sm font-500"
+               style="color:#95D5B2;">Browse Events</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard:events' %}" class="block px-3 py-2.5 rounded-lg text-sm"
+                   style="color:#95D5B2;">Dashboard</a>
+                <a href="{% url 'dashboard:profile' %}" class="block px-3 py-2.5 rounded-lg text-sm"
+                   style="color:#95D5B2;">Profile</a>
+                <a href="{% url 'dashboard:notifications' %}" class="block px-3 py-2.5 rounded-lg text-sm"
+                   style="color:#95D5B2;">Notifications</a>
+                {% if user.is_organizer %}
+                    <a href="{% url 'dashboard:create_event' %}" class="block px-3 py-2.5 rounded-lg text-sm"
+                       style="color:#D4A017; font-weight:600;">+ Create Event</a>
+                {% endif %}
+                <div style="height:1px; background:rgba(255,255,255,0.1); margin: 0.5rem 0;"></div>
+                <a href="{% url 'accounts:logout' %}" class="block px-3 py-2.5 rounded-lg text-sm"
+                   style="color:#FCA5A5;">Sign Out</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="block px-3 py-2.5 rounded-lg text-sm"
+                   style="color:#95D5B2;">Sign In</a>
+                <a href="{% url 'accounts:register' %}" class="block px-3 py-2.5 rounded-lg text-sm"
+                   style="color:#D4A017; font-weight:600;">Register</a>
+            {% endif %}
         </div>
     </div>
 </nav>
