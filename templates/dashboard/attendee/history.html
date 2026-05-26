@@ -1,42 +1,37 @@
 {% extends "dashboard/base_dashboard.html" %}
-{% block title %}History{% endblock %}
+{% block title %}Event History{% endblock %}
 {% block dashboard_content %}
 
-<h1>Past Events</h1>
+<div class="p-8">
+    <h1 class="text-4xl font-bold text-serene-900 mb-8">Event History</h1>
 
-{% for ticket in past_tickets %}
-    <div>
-        <h3>{{ ticket.tier.event.title }}</h3>
-        <p>Attended: {{ ticket.tier.event.end_datetime }}</p>
-        <p>Tier: {{ ticket.tier.name }}</p>
-        {% if not ticket.feedback.submitted_at %}
-            <h4>How was this event?</h4>
-            <form method="post" action="{% url 'community:submit_feedback' %}">
-                {% csrf_token %}
-                <input type="hidden" name="ticket_id" value="{{ ticket.pk }}">
-                <label>Rating (1-5)</label>
-                <input type="number" name="rating" min="1" max="5" required>
-                <label>Comments</label>
-                <textarea name="text" placeholder="Your feedback..."></textarea>
-                <button type="submit">Submit Feedback</button>
-            </form>
-        {% else %}
-            <p>Feedback submitted. Thank you!</p>
-        {% endif %}
-        <h4>Write a Public Review</h4>
-        <form method="post" action="{% url 'community:submit_review' ticket.tier.event.pk %}">
-            {% csrf_token %}
-            <label>Rating (1-5)</label>
-            <input type="number" name="rating" min="1" max="5" required>
-            <label>Review</label>
-            <textarea name="body" placeholder="Share your experience..."></textarea>
-            <button type="submit">Post Review</button>
-        </form>
-
-        <a href="{{ ticket.qr_code.url }}" download>Download Ticket</a>
-    </div>
-{% empty %}
-    <p>No past events attended.</p>
-{% endfor %}
+    {% if past_events %}
+        <div class="space-y-4">
+            {% for event in past_events %}
+                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition border-l-4 border-serene-200">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-serene-900 mb-2">{{ event.title }}</h3>
+                            <p class="text-serene-600 text-sm mb-4">
+                                {{ event.start_datetime|date:"F d, Y" }} at {{ event.start_datetime|time:"g:i A" }}
+                            </p>
+                            <div class="flex gap-2">
+                                <span class="bg-serene-100 text-serene-700 px-3 py-1 rounded-full text-xs font-semibold">{{ event.get_category_display }}</span>
+                                <span class="bg-serene-100 text-serene-700 px-3 py-1 rounded-full text-xs font-semibold">{{ event.get_mode_display }}</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'events:detail' event.slug %}" class="px-6 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 transition font-medium">
+                            View
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-serene-50 rounded-xl p-12 text-center">
+            <p class="text-serene-700 text-lg">No past events yet. Attend events to build your history!</p>
+        </div>
+    {% endif %}
+</div>
 
 {% endblock %}

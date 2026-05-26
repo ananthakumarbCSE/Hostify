@@ -1,11 +1,46 @@
-<div>
+<div class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden border-l-4 border-serene-300">
     {% if event.banner %}
-        <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+        <div class="h-48 overflow-hidden bg-serene-100">
+            <img src="{{ event.banner.url }}" alt="{{ event.title }}" class="w-full h-full object-cover hover:scale-105 transition">
+        </div>
+    {% else %}
+        <div class="h-48 bg-gradient-to-br from-serene-200 to-serene-300"></div>
     {% endif %}
-    <h3><a href="{% url 'events:detail' event.slug %}">{{ event.title }}</a></h3>
-    <p>{{ event.category }} | {{ event.mode }} | {{ event.price_type }}</p>
-    <p>{{ event.start_datetime }}</p>
-    {% if event.venue_city %}
-        <p>{{ event.venue_city }}</p>
-    {% endif %}
+
+    <div class="p-6">
+        <div class="flex items-start justify-between mb-2">
+            {% if event.logo %}
+                <img src="{{ event.logo.url }}" alt="{{ event.title }}" class="w-12 h-12 rounded-lg object-cover">
+            {% else %}
+                <div class="w-12 h-12 bg-serene-200 rounded-lg"></div>
+            {% endif %}
+        </div>
+
+        <h3 class="text-xl font-bold text-serene-900 mb-2 hover:text-serene-600">
+            <a href="{% url 'events:detail' event.slug %}">{{ event.title }}</a>
+        </h3>
+
+        <p class="text-serene-600 text-sm mb-4 line-clamp-2">
+            <span class="inline-block bg-serene-100 px-3 py-1 rounded-full mr-2">{{ event.get_category_display }}</span>
+            <span class="inline-block bg-serene-100 px-3 py-1 rounded-full">{{ event.get_mode_display }}</span>
+        </p>
+
+        <div class="space-y-2 text-sm text-serene-700 mb-4">
+            <p> {{ event.start_datetime|date:"M d, Y" }}</p>
+            {% if event.venue_city %}
+                <p> {{ event.venue_city }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-serene-100">
+            {% if event.price_type == 'free' %}
+                <span class="text-lg font-bold text-serene-500">FREE</span>
+            {% else %}
+                <span class="text-lg font-bold text-serene-600">Starting from ₹{{ event.get_min_price }}</span>
+            {% endif %}
+            <a href="{% url 'events:detail' event.slug %}" class="px-4 py-2 bg-serene-300 text-white rounded-lg hover:bg-serene-400 transition font-medium">
+                Details
+            </a>
+        </div>
+    </div>
 </div>

@@ -2,22 +2,41 @@
 {% block title %}EventSphere - Discover Events{% endblock %}
 {% block content %}
 
-<h1>Welcome to EventSphere</h1>
-<p>Discover and attend events near you.</p>
-<a href="{% url 'events:list' %}">Browse All Events</a>
+<div class="bg-gradient-to-r from-serene-200 to-serene-300 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-5xl font-bold mb-4">Welcome to EventSphere</h1>
+        <p class="text-xl text-serene-100 mb-8">Discover and attend amazing events near you</p>
+        <a href="{% url 'events:list' %}" class="inline-block px-8 py-4 bg-white text-serene-600 font-bold rounded-lg hover:bg-serene-100 transition transform hover:scale-105">
+            Browse All Events
+        </a>
+    </div>
+</div>
 
-{% if recommended %}
-    <h2>Recommended for You</h2>
-    {% for event in recommended %}
-        {% include "components/event_card.html" %}
-    {% endfor %}
-{% endif %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    
+    {% if recommended %}
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold text-serene-900 mb-8 pb-4 border-b-4 border-serene-300">Recommended for You</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for event in recommended %}
+                    {% include "components/event_card.html" %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
 
-<h2>Upcoming Events</h2>
-{% for event in upcoming %}
-    {% include "components/event_card.html" %}
-{% empty %}
-    <p>No upcoming events.</p>
-{% endfor %}
+    <section>
+        <h2 class="text-4xl font-bold text-serene-900 mb-8 pb-4 border-b-4 border-serene-300">Upcoming Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for event in upcoming %}
+                {% include "components/event_card.html" %}
+            {% empty %}
+                <div class="col-span-full bg-serene-100 rounded-lg p-12 text-center">
+                    <p class="text-serene-700 text-lg">No upcoming events at the moment. Check back soon!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
 
 {% endblock %}

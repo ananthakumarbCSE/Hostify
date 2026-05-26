@@ -1,7 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Payment Failed{% endblock %}
 {% block content %}
-<h1>Payment Failed</h1>
-<p>We were unable to complete your payment. Please try again or contact support.</p>
-<p><a href="{% url 'events:list' %}">Browse events</a></p>
+
+<div class="min-h-screen bg-gradient-to-br from-red-50 via-white to-serene-50 flex items-center justify-center py-12">
+    <div class="max-w-md w-full">
+        
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            
+            <!-- Error Icon -->
+            <div class="bg-gradient-to-r from-red-400 to-red-500 px-8 py-12 text-center">
+                <div class="text-6xl mb-4">X</div>
+                <h1 class="text-3xl font-bold text-white mb-2">Payment Failed</h1>
+                <p class="text-red-100">Your transaction could not be completed</p>
+            </div>
+
+            <!-- Details -->
+            <div class="px-8 py-8 space-y-6">
+                
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                    <p class="text-red-800 font-semibold">{{ error_message }}</p>
+                </div>
+
+                <div class="border-t-2 border-serene-200 pt-6">
+                    <p class="text-serene-600 font-semibold mb-4">Try Again</p>
+                    <p class="text-serene-700 text-sm mb-4">Please check your payment details and try again</p>
+                    
+                    <div class="space-y-3">
+                        <a href="{% url 'payments:confirm_order' %}" class="block w-full py-3 bg-serene-300 text-white font-bold rounded-lg hover:bg-serene-400 transition text-center">
+                            Retry Payment
+                        </a>
+                        <a href="{% url 'events:list' %}" class="block w-full py-3 bg-serene-100 text-serene-700 font-bold rounded-lg hover:bg-serene-200 transition text-center">
+                            Browse Events
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-serene-50 rounded-lg p-4 text-center">
+                    <p class="text-serene-600 text-sm">Need help? Contact our support team</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-serene-600 text-sm">
+            <p>Your payment information is secure</p>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

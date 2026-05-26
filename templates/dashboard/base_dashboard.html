@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div>
+<div class="flex bg-serene-50 min-h-screen">
     {% include "components/sidebar.html" %}
-    <div>
-        {% block dashboard_content %}{% endblock %}
+    
+    <div class="flex-1 overflow-auto">
+        <div class="max-w-6xl mx-auto">
+            {% block dashboard_content %}{% endblock %}
+        </div>
     </div>
 </div>
 

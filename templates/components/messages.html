@@ -1,5 +1,35 @@
 {% if messages %}
-    {% for message in messages %}
-        <p>[{{ message.tags }}] {{ message }}</p>
-    {% endfor %}
+    <div class="fixed top-0 left-0 right-0 z-50 max-h-screen overflow-y-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            {% for message in messages %}
+                <div class="rounded-lg p-4 mb-4 border-l-4 flex items-center justify-between animate-slide-in
+                    {% if message.tags == 'error' %}bg-red-50 border-red-400 text-red-800
+                    {% elif message.tags == 'success' %}bg-green-50 border-green-400 text-green-800
+                    {% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-400 text-yellow-800
+                    {% else %}bg-serene-50 border-serene-400 text-serene-800{% endif %} shadow-lg">
+                    
+                    <span class="font-medium">{{ message }}</span>
+                    <button onclick="this.parentElement.remove()" class="text-lg opacity-60 hover:opacity-100 transition font-bold">
+                        ×
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
 {% endif %}

@@ -4,13 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}EventSphere{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'serene': {
+                            50: '#f0f8ff',
+                            100: '#e1f0ff',
+                            200: '#c2e0ff',
+                            300: '#8ecae6',
+                            400: '#a2d5f7',
+                            500: '#219ebc',
+                            600: '#0077b6',
+                            700: '#005a96',
+                            800: '#003d6b',
+                            900: '#001d3d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            @apply transition-colors duration-200;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-serene-50 text-serene-900">
 
     {% include "components/navbar.html" %}
     {% include "components/messages.html" %}
 
-    <main>
+    <main class="min-h-screen">
         {% block content %}{% endblock %}
     </main>
 

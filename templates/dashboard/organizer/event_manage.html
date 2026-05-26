@@ -1,139 +1,86 @@
 {% extends "dashboard/base_dashboard.html" %}
-{% block title %}Manage - {{ event.title }}{% endblock %}
+{% block title %}Manage Event - {{ event.title }}{% endblock %}
 {% block dashboard_content %}
 
-<h1>{{ event.title }}</h1>
-<a href="{% url 'dashboard:edit_event' event.pk %}">Edit Event</a>
-<a href="{% url 'dashboard:checkin' event.pk %}">Open Check-in Panel</a>
-
-<h2>Overview</h2>
-<p>Total Registered: {{ total_registered }}</p>
-<p>Total Revenue: ₹{{ total_revenue }}</p>
-<p>Checked In: {{ total_checked }}</p>
-
-<h2>Ticket Breakdown</h2>
-{% for tier in tiers %}
-    <p>{{ tier.name }}: {{ tier.tickets_sold }} sold / {{ tier.capacity }} capacity</p>
-{% endfor %}
-
-<h2>Attendee List</h2>
-<a href="?export=csv">Download CSV</a>
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Ticket Tier</th>
-        <th>Checked In</th>
-        <th>Issued At</th>
-    </tr>
-    {% for ticket in tickets %}
-        <tr>
-            <td>{{ ticket.attendee.get_full_name }}</td>
-            <td>{{ ticket.attendee.email }}</td>
-            <td>{{ ticket.tier.name }}</td>
-            <td>{{ ticket.checked_in|yesno:"Yes,No" }}</td>
-            <td>{{ ticket.issued_at }}</td>
-        </tr>
-    {% empty %}
-        <tr><td colspan="5">No registrations yet.</td></tr>
-    {% endfor %}
-</table>
-
-<h2>Refund Requests</h2>
-{% for refund in refund_requests %}
-    <div>
-        <p>Order #{{ refund.order.pk }} — ₹{{ refund.amount }}</p>
-        <p>Reason: {{ refund.reason }}</p>
-        <p>Status: {{ refund.get_status_display }}</p>
-        {% if refund.status == "requested" %}
-            <form method="post" action="{% url 'payments:refund_review' refund.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="approve">
-                <button type="submit">Approve</button>
-            </form>
-            <form method="post" action="{% url 'payments:refund_review' refund.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="reject">
-                <textarea name="review_note" placeholder="Reason for rejection"></textarea>
-                <button type="submit">Reject</button>
-            </form>
-        {% endif %}
+<div class="p-8">
+    <div class="mb-8">
+        <a href="{% url 'dashboard:events' %}" class="text-serene-600 hover:text-serene-900 font-medium">Back to My Events</a>
     </div>
-{% empty %}
-    <p>No refund requests.</p>
-{% endfor %}
 
-<h2>Attendee Questions</h2>
-{% for qa in questions %}
-    <div>
-        <p>Q: {{ qa.question }} — by {{ qa.asked_by.get_full_name }}</p>
-        {% if not qa.answer %}
-            <form method="post" action="{% url 'community:answer_question' qa.pk %}">
-                {% csrf_token %}
-                <textarea name="answer" placeholder="Your answer..."></textarea>
-                <button type="submit">Answer</button>
-            </form>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-serene-300">
+            <p class="text-serene-600 text-sm font-semibold">Total Capacity</p>
+            <p class="text-3xl font-bold text-serene-900">{{ event.total_capacity }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-serene-400">
+            <p class="text-serene-600 text-sm font-semibold">Tickets Sold</p>
+            <p class="text-3xl font-bold text-serene-900">{{ tickets_sold }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-serene-500">
+            <p class="text-serene-600 text-sm font-semibold">Available Seats</p>
+            <p class="text-3xl font-bold text-serene-900">{{ available_seats }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-400">
+            <p class="text-serene-600 text-sm font-semibold">Revenue</p>
+            <p class="text-3xl font-bold text-green-600">₹{{ total_revenue }}</p>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <a href="{% url 'dashboard:edit_event' event.id %}" class="bg-serene-300 text-white px-6 py-3 rounded-lg hover:bg-serene-400 transition font-bold text-center">
+            Edit Event
+        </a>
+        <a href="{% url 'dashboard:checkin' event.id %}" class="bg-serene-400 text-white px-6 py-3 rounded-lg hover:bg-serene-500 transition font-bold text-center">
+            Check-in Attendees
+        </a>
+        <button class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition font-bold">
+            Cancel Event
+        </button>
+    </div>
+
+    <!-- Attendees List -->
+    <div class="bg-white rounded-xl shadow-md p-8">
+        <h2 class="text-2xl font-bold text-serene-900 mb-6">Attendees</h2>
+        
+        {% if attendees %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-serene-300">
+                            <th class="text-left py-4 px-4 text-serene-900 font-bold">Name</th>
+                            <th class="text-left py-4 px-4 text-serene-900 font-bold">Email</th>
+                            <th class="text-left py-4 px-4 text-serene-900 font-bold">Ticket Type</th>
+                            <th class="text-center py-4 px-4 text-serene-900 font-bold">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendee in attendees %}
+                        <tr class="border-b border-serene-200 hover:bg-serene-50">
+                            <td class="py-4 px-4 text-serene-900 font-medium">{{ attendee.user.get_full_name }}</td>
+                            <td class="py-4 px-4 text-serene-700">{{ attendee.user.email }}</td>
+                            <td class="py-4 px-4 text-serene-700">{{ attendee.tier.name }}</td>
+                            <td class="py-4 px-4 text-center">
+                                {% if attendee.checked_in %}
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Checked In</span>
+                                {% else %}
+                                    <span class="bg-serene-100 text-serene-800 px-3 py-1 rounded-full text-sm font-semibold">Pending</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-            <p>A: {{ qa.answer }}</p>
+            <div class="bg-serene-50 rounded-lg p-8 text-center">
+                <p class="text-serene-700">No attendees yet</p>
+            </div>
         {% endif %}
     </div>
-{% empty %}
-    <p>No questions yet.</p>
-{% endfor %}
+</div>
 
-<h2>Feedback Summary</h2>
-<p>Average Rating: {{ avg_feedback_rating|floatformat:1|default:"N/A" }} / 5</p>
-{% for fb in feedbacks %}
-    <div>
-        <p>{{ fb.rating }}/5 — {{ fb.text }}</p>
-    </div>
-{% empty %}
-    <p>No feedback received yet.</p>
-{% endfor %}
-
-<h2>Payout</h2>
-{% if payout %}
-    <p>Status: {{ payout.get_status_display }}</p>
-    <p>Gross: ₹{{ payout.gross }}</p>
-    <p>Platform Fee: ₹{{ payout.platform_fee }}</p>
-    <p>Net: ₹{{ payout.net }}</p>
-{% else %}
-    <p>Payout not yet processed.</p>
-{% endif %}
-
-<h2>AI Schedule Builder</h2>
-<p>Current session order:</p>
-{% for session in sessions %}
-    <p>{{ forloop.counter }}. {{ session.title }} ({{ session.speaker }})</p>
-{% endfor %}
-<button onclick="buildSchedule()">Suggest Optimal Order (AI)</button>
-<div id="ai-schedule-result"></div>
-
-{% endblock %}
-
-{% block scripts %}
-<script>
-function buildSchedule() {
-    const sessions = [
-        {% for s in sessions %}
-        {id: {{ forloop.counter0 }}, title: "{{ s.title }}", speaker: "{{ s.speaker.name|default:'' }}", duration_min: {{ s.end_time|timeuntil:s.start_time|default:60 }}},
-        {% endfor %}
-    ];
-
-    fetch('/api/ai/schedule/{{ event.pk }}/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
-        body: JSON.stringify({sessions: sessions})
-    })
-    .then(r => r.json())
-    .then(data => {
-        let html = '<h3>Suggested Order:</h3><ol>';
-        data.ordered_sessions.forEach(s => {
-            html += '<li>' + s.title + ' — ' + s.reason + '</li>';
-        });
-        html += '</ol>';
-        document.getElementById('ai-schedule-result').innerHTML = html;
-    });
-}
-</script>
 {% endblock %}

@@ -55,8 +55,15 @@ INSTALLED_APPS = [
     
     # images storgae place
     "cloudinary",
-    "cloudinary_storage"
+    "cloudinary_storage",
+
+    # form styling
+    'crispy_forms',
+    'crispy_tailwind'
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_TEMPLATE_PACK = "tailwind"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

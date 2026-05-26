@@ -1,6 +1,36 @@
-<a href="{% url 'dashboard:notifications' %}">
-    Notifications
-    {% if unread_notifications %}
-        ({{ unread_notifications }})
-    {% endif %}
-</a>
+<div class="relative group">
+    <button class="relative p-2 text-serene-600 hover:text-serene-900 transition">
+        <span class="text-lg">🔔</span>
+        {% if unread_notifications %}
+            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                {{ unread_notifications|truncatewords:2 }}
+            </span>
+        {% endif %}
+    </button>
+
+    <div class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 invisible group-hover:visible transition z-50">
+        <div class="p-4 border-b border-serene-200">
+            <h3 class="font-bold text-serene-900">Notifications</h3>
+        </div>
+
+        <div class="max-h-96 overflow-y-auto">
+            {% if unread_count %}
+                {% for notification in recent_notifications %}
+                    <a href="{{ notification.action_url }}" class="block px-4 py-3 hover:bg-serene-50 border-b border-serene-100 transition">
+                        <p class="font-semibold text-serene-900 text-sm">{{ notification.title }}</p>
+                        <p class="text-serene-700 text-xs truncate">{{ notification.message }}</p>
+                        <p class="text-serene-500 text-xs mt-1">{{ notification.created_at|timesince }} ago</p>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="p-8 text-center text-serene-600">
+                    <p class="text-sm">No new notifications</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'dashboard:notifications' %}" class="block px-4 py-3 text-center text-serene-600 hover:text-serene-900 border-t border-serene-200 font-medium text-sm transition">
+            View All
+        </a>
+    </div>
+</div>
