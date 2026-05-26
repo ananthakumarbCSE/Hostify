@@ -30,7 +30,7 @@
                 </div>
 
                 <!-- Meta Grid -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 pb-8 divider">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 pb-8">
                     <div class="rounded-lg p-4" style="background: #F0EBE1;">
                         <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7B73;">Category</p>
                         <p class="font-bold" style="color: #1B4332;">{{ event.get_category_display }}</p>
@@ -48,10 +48,11 @@
                         <p class="font-bold" style="color: #1B4332;">{{ event.start_datetime|time:"g:i A" }}</p>
                     </div>
                 </div>
+                <div class="divider mb-8"></div>
 
                 <!-- Venue / Location -->
                 {% if event.venue_name or event.online_link %}
-                    <div class="mb-8 pb-8 divider">
+                    <div class="mb-8 pb-8">
                         <h3 class="font-display text-lg font-bold mb-3" style="color: #1B4332;">Location</h3>
                         {% if event.venue_name %}
                             <p style="color: #2C3E35;">
@@ -65,8 +66,9 @@
                             </a>
                         {% endif %}
                     </div>
+                    <div class="divider mb-8"></div>
                 {% endif %}
-                <br>
+
                 <!-- Description -->
                 <div class="mb-8">
                     <h3 class="font-display text-lg font-bold mb-3" style="color: #1B4332;">About This Event</h3>
