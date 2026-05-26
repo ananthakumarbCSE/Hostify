@@ -238,6 +238,26 @@ def edit_event_view(request, event_id):
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field}: {error}")
+            if not session_forms.is_valid():
+                for form_errors in session_forms.errors:
+                    if form_errors:
+                        messages.error(request, f"Session error: {form_errors}")
+            if not tier_forms.is_valid():
+                for form_errors in tier_forms.errors:
+                    if form_errors:
+                        messages.error(request, f"Ticket Tier error: {form_errors}")
+            if not discount_forms.is_valid():
+                for form_errors in discount_forms.errors:
+                    if form_errors:
+                        messages.error(request, f"Discount Code error: {form_errors}")
+            if not faq_forms.is_valid():
+                for form_errors in faq_forms.errors:
+                    if form_errors:
+                        messages.error(request, f"FAQ error: {form_errors}")
+            if not sponsor_forms.is_valid():
+                for form_errors in sponsor_forms.errors:
+                    if form_errors:
+                        messages.error(request, f"Sponsor error: {form_errors}")
     else:
         form           = EventForm(instance=event)
         session_forms  = EventSessionFormSet(prefix="sessions",  instance=event)

@@ -58,11 +58,24 @@
                     {% endfor %}
 
                     <style>
-                        form input, form select {
-                            @apply w-full px-4 py-3 border-2 border-serene-200 rounded-lg focus:outline-none focus:border-serene-400 bg-serene-50 text-serene-900 text-sm;
+                        form input, form select, form textarea {
+                            width: 100%;
+                            padding: 0.75rem 1rem;
+                            border: 2px solid #000;
+                            border-radius: 0.5rem;
+                            background-color: #f8fafc;
+                            color: #0f172a;
+                            font-size: 0.95rem;
+                            box-sizing: border-box;
+                        }
+                        form input:focus, form select:focus, form textarea:focus {
+                            outline: none;
+                            border-color: #000;
+                            box-shadow: 0 0 0 3px rgba(0,0,0,0.12);
                         }
                         form input[type="checkbox"] {
-                            @apply w-5 h-5 text-serene-400;
+                            width: 1.25rem;
+                            height: 1.25rem;
                         }
                     </style>
 

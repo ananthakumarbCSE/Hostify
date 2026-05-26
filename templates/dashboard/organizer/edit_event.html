@@ -73,13 +73,25 @@
                     {{ form.end_datetime }}
                     {% if form.end_datetime.errors %}<span class="text-red-600 text-sm">{{ form.end_datetime.errors }}</span>{% endif %}
                 </div>
+
+                <div>
+                    <label class="block text-serene-900 font-semibold mb-2">Chief Guest (Optional)</label>
+                    {{ form.chief_guest }}
+                    {% if form.chief_guest.errors %}<span class="text-red-600 text-sm">{{ form.chief_guest.errors }}</span>{% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-serene-900 font-semibold mb-2">Total Capacity</label>
+                    {{ form.total_capacity }}
+                    {% if form.total_capacity.errors %}<span class="text-red-600 text-sm">{{ form.total_capacity.errors }}</span>{% endif %}
+                </div>
             </div>
 
             <style>
-                form input, form select, form textarea {
-                    @apply w-full px-4 py-3 border-2 border-serene-200 rounded-lg focus:outline-none focus:border-serene-400 bg-serene-50 text-serene-900;
-                }
-            </style>
+    form input, form select, form textarea {
+        @apply w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:border-gray-700 bg-serene-50 text-serene-900;
+    }
+</style>
         </div>
 
         <!-- Description -->
@@ -164,6 +176,131 @@
                 </div>
             </div>
         </div>
+
+        <!-- Ticket Tiers -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Ticket Tiers</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-2 border-serene-300">Ticket Tiers</h2>
+                <div id="tiers-formset" class="space-y-6">
+                    {{ tier_forms.management_form }}
+                    {% if tier_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ tier_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for tf in tier_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if tf.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ tf.non_field_errors }}</div>
+                            {% endif %}
+                            {{ tf.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
+
+        <!-- Sessions -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Agenda / Sessions</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-2 border-serene-300">Agenda / Sessions</h2>
+                <div id="sessions-formset" class="space-y-6">
+                    {{ session_forms.management_form }}
+                    {% if session_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ session_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for sf in session_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if sf.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ sf.non_field_errors }}</div>
+                            {% endif %}
+                            {{ sf.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
+
+        <!-- Discount Codes -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Discount Codes (Optional)</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-2 border-serene-300">Discount Codes (Optional)</h2>
+                <div class="formset-section space-y-6">
+                    {{ discount_forms.management_form }}
+                    {% if discount_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ discount_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for df in discount_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if df.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ df.non_field_errors }}</div>
+                            {% endif %}
+                            {{ df.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
+
+        <!-- FAQs -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">FAQs (Optional)</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-2 border-serene-300">FAQs (Optional)</h2>
+                <div id="faqs-formset" class="space-y-6">
+                    {{ faq_forms.management_form }}
+                    {% if faq_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ faq_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for faq_f in faq_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if faq_f.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ faq_f.non_field_errors }}</div>
+                            {% endif %}
+                            {{ faq_f.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
+
+        <!-- Sponsors -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Sponsors (Optional)</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-2 border-serene-300">Sponsors (Optional)</h2>
+                <div id="sponsors-formset" class="space-y-6">
+                    {{ sponsor_forms.management_form }}
+                    {% if sponsor_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ sponsor_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for spf in sponsor_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if spf.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ spf.non_field_errors }}</div>
+                            {% endif %}
+                            {{ spf.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
 
         <!-- Submit Buttons -->
         <div class="flex gap-4">

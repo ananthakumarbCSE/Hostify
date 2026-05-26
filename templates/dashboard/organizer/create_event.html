@@ -140,6 +140,7 @@
         <!-- AI Assistance -->
         <div class="bg-gradient-to-r from-serene-50 to-serene-100 rounded-xl shadow-md p-8 border-l-4 border-serene-300">
             <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">AI Assistance</h2>
+            <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded text-blue-800 text-sm" id="autofill-debug" style="display:none;"></div>
             
             <div class="mb-6">
                 <label class="block text-serene-900 font-semibold mb-2">Auto-fill All Fields</label>
@@ -158,8 +159,13 @@
             </div>
         </div>
 
-        <!-- Images -->
-        <div class="bg-white rounded-xl shadow-md p-8">
+        <!-- Images (Collapsible) -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Event Images</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
             <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Event Images</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,13 +183,19 @@
                     <p class="text-serene-600 text-sm mt-2">Recommended: 1280x720px</p>
                 </div>
             </div>
-        </div>
+            </div>
+        </details>
 
-        <!-- Venue Information -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Venue Information</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Venue Information (Collapsible) -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Venue Information</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Venue Information</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-serene-900 font-semibold mb-2">Venue Name</label>
                     {{ form.venue_name }}
@@ -208,33 +220,45 @@
                     {% if form.online_link.errors %}<span class="text-red-600 text-sm">{{ form.online_link.errors }}</span>{% endif %}
                 </div>
             </div>
-        </div>
-
-        <!-- Ticket Tiers -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Ticket Tiers</h2>
-            
-            <div id="tiers-formset" class="space-y-6">
-                {{ tier_forms.management_form }}
-                {% if tier_forms.non_form_errors %}
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ tier_forms.non_form_errors }}</div>
-                {% endif %}
-                {% for tf in tier_forms %}
-                    <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                        {% if tf.non_field_errors %}
-                            <div class="text-red-600 text-sm mb-4">{{ tf.non_field_errors }}</div>
-                        {% endif %}
-                        {{ tf.as_p }}
-                    </div>
-                {% endfor %}
             </div>
-        </div>
+        </details>
 
-        <!-- Sessions / Agenda -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Agenda / Sessions</h2>
-            
-            <div id="sessions-formset" class="space-y-6">
+        <!-- Ticket Tiers (Collapsible) -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Ticket Tiers</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Ticket Tiers</h2>
+                
+                <div id="tiers-formset" class="space-y-6">
+                    {{ tier_forms.management_form }}
+                    {% if tier_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ tier_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for tf in tier_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if tf.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ tf.non_field_errors }}</div>
+                            {% endif %}
+                            {{ tf.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
+
+        <!-- Sessions / Agenda (Collapsible) -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Agenda / Sessions</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Agenda / Sessions</h2>
+                
+                <div id="sessions-formset" class="space-y-6">
                 {{ session_forms.management_form }}
                 {% if session_forms.non_form_errors %}
                     <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ session_forms.non_form_errors }}</div>
@@ -248,67 +272,86 @@
                     </div>
                 {% endfor %}
             </div>
-        </div>
-
-        <!-- Discount Codes -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Discount Codes (Optional)</h2>
-            
-            <div class="formset-section space-y-6">
-                {{ discount_forms.management_form }}
-                {% if discount_forms.non_form_errors %}
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ discount_forms.non_form_errors }}</div>
-                {% endif %}
-                {% for df in discount_forms %}
-                    <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                        {% if df.non_field_errors %}
-                            <div class="text-red-600 text-sm mb-4">{{ df.non_field_errors }}</div>
-                        {% endif %}
-                        {{ df.as_p }}
-                    </div>
-                {% endfor %}
             </div>
-        </div>
+        </details>
 
-        <!-- FAQs -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">FAQs (Optional)</h2>
-            
-            <div id="faqs-formset" class="space-y-6">
-                {{ faq_forms.management_form }}
-                {% if faq_forms.non_form_errors %}
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ faq_forms.non_form_errors }}</div>
-                {% endif %}
-                {% for faq_f in faq_forms %}
-                    <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                        {% if faq_f.non_field_errors %}
-                            <div class="text-red-600 text-sm mb-4">{{ faq_f.non_field_errors }}</div>
-                        {% endif %}
-                        {{ faq_f.as_p }}
-                    </div>
-                {% endfor %}
+        <!-- Discount Codes (Collapsible) -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Discount Codes (Optional)</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Discount Codes (Optional)</h2>
+                
+                <div class="formset-section space-y-6">
+                    {{ discount_forms.management_form }}
+                    {% if discount_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ discount_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for df in discount_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if df.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ df.non_field_errors }}</div>
+                            {% endif %}
+                            {{ df.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
+        </details>
 
-        <!-- Sponsors -->
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Sponsors (Optional)</h2>
-            
-            <div id="sponsors-formset" class="space-y-6">
-                {{ sponsor_forms.management_form }}
-                {% if sponsor_forms.non_form_errors %}
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ sponsor_forms.non_form_errors }}</div>
-                {% endif %}
-                {% for spf in sponsor_forms %}
-                    <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
-                        {% if spf.non_field_errors %}
-                            <div class="text-red-600 text-sm mb-4">{{ spf.non_field_errors }}</div>
-                        {% endif %}
-                        {{ spf.as_p }}
-                    </div>
-                {% endfor %}
+        <!-- FAQs (Collapsible) -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">FAQs (Optional)</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">FAQs (Optional)</h2>
+                
+                <div id="faqs-formset" class="space-y-6">
+                    {{ faq_forms.management_form }}
+                    {% if faq_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ faq_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for faq_f in faq_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if faq_f.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ faq_f.non_field_errors }}</div>
+                            {% endif %}
+                            {{ faq_f.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
+        </details>
+
+        <!-- Sponsors (Collapsible) -->
+        <details class="bg-white rounded-xl shadow-md overflow-hidden group">
+            <summary class="bg-serene-50 cursor-pointer px-8 py-6 hover:bg-serene-100 transition flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-serene-900 pb-0 border-b-0">Sponsors (Optional)</h2>
+                <span class="text-serene-600 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-serene-900 mb-6 pb-4 border-b-4 border-serene-300">Sponsors (Optional)</h2>
+                
+                <div id="sponsors-formset" class="space-y-6">
+                    {{ sponsor_forms.management_form }}
+                    {% if sponsor_forms.non_form_errors %}
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">{{ sponsor_forms.non_form_errors }}</div>
+                    {% endif %}
+                    {% for spf in sponsor_forms %}
+                        <div class="formset-item border-2 border-serene-300 rounded-lg p-6 bg-serene-50">
+                            {% if spf.non_field_errors %}
+                                <div class="text-red-600 text-sm mb-4">{{ spf.non_field_errors }}</div>
+                            {% endif %}
+                            {{ spf.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
 
         <!-- Submit Buttons -->
         <div class="flex gap-4 pb-8">
@@ -326,35 +369,110 @@
     async function autoFillAllFields() {
         const briefText = document.getElementById('ai-brief').value;
         const feedbackDiv = document.getElementById('auto-fill-feedback');
+        const debugDiv = document.getElementById('autofill-debug');
         
         if (!briefText.trim()) {
             feedbackDiv.textContent = 'Please enter event details first';
+            feedbackDiv.className = 'mt-2 text-red-600 text-sm';
             return;
         }
 
         feedbackDiv.textContent = 'Processing...';
+        feedbackDiv.className = 'mt-2 text-blue-600 text-sm';
         
         try {
-            const response = await fetch('/api/ai-services/autofill-event/', {
+            const response = await fetch('/api/ai/auto-fill-event/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value || ''
                 },
                 body: JSON.stringify({ brief: briefText })
             });
-
-            const data = await response.json();
-            if (data.ok) {
-                if (data.data.title) document.querySelector('[name="title"]').value = data.data.title;
-                if (data.data.description) document.querySelector('[name="description"]').value = data.data.description;
-                feedbackDiv.textContent = 'Fields filled successfully!';
+            
+            debugDiv.textContent = 'Status: ' + response.status + ', Content-Type: ' + response.headers.get('content-type');
+            debugDiv.style.display = 'block';
+            
+            const json = await response.json();
+            debugDiv.textContent += ' | Response keys: ' + Object.keys(json.form_data || {}).join(', ');
+            
+            if (!response.ok) {
+                feedbackDiv.textContent = 'Error: ' + (json.error || 'Request failed with status ' + response.status);
+                feedbackDiv.className = 'mt-2 text-red-600 text-sm';
+                return;
+            }
+            
+            if (json.form_data) {
+                const data = json.form_data;
+                const fieldsToFill = {
+                    'title': data.title,
+                    'description': data.description,
+                    'category': data.category,
+                    'mode': data.mode,
+                    'price_type': data.price_type,
+                    'status': data.status,
+                    'venue_name': data.venue_name,
+                    'venue_city': data.venue_city,
+                    'venue_address': data.venue_address,
+                    'online_link': data.online_link,
+                    'chief_guest': data.chief_guest,
+                    'total_capacity': data.total_capacity
+                };
+                
+                let filledCount = 0;
+                for (const [fieldName, fieldValue] of Object.entries(fieldsToFill)) {
+                    if (fieldValue) {
+                        const el = document.querySelector('[name="' + fieldName + '"]');
+                        if (el) {
+                            el.value = fieldValue;
+                            filledCount++;
+                        }
+                    }
+                }
+                
+                // Handle datetime fields separately
+                if (data.start_datetime) {
+                    const startEl = document.querySelector('[name="start_datetime"]');
+                    if (startEl) {
+                        // Convert ISO format to datetime-local format if needed
+                        let dateStr = data.start_datetime;
+                        if (dateStr.includes('T')) {
+                            dateStr = dateStr.substring(0, 16); // Get YYYY-MM-DDTHH:MM
+                        } else if (dateStr.includes(' ')) {
+                            dateStr = dateStr.replace(' ', 'T').substring(0, 16);
+                        }
+                        startEl.value = dateStr;
+                        filledCount++;
+                    }
+                }
+                
+                if (data.end_datetime) {
+                    const endEl = document.querySelector('[name="end_datetime"]');
+                    if (endEl) {
+                        // Convert ISO format to datetime-local format if needed
+                        let dateStr = data.end_datetime;
+                        if (dateStr.includes('T')) {
+                            dateStr = dateStr.substring(0, 16); // Get YYYY-MM-DDTHH:MM
+                        } else if (dateStr.includes(' ')) {
+                            dateStr = dateStr.replace(' ', 'T').substring(0, 16);
+                        }
+                        endEl.value = dateStr;
+                        filledCount++;
+                    }
+                }
+                
+                feedbackDiv.textContent = 'Success! Filled ' + filledCount + ' fields.';
                 feedbackDiv.className = 'mt-2 text-green-600 text-sm';
+                debugDiv.style.display = 'none';
             } else {
-                feedbackDiv.textContent = 'Error: ' + data.error;
+                feedbackDiv.textContent = 'Error: No form data returned';
+                feedbackDiv.className = 'mt-2 text-red-600 text-sm';
             }
         } catch (error) {
-            feedbackDiv.textContent = 'Error processing request';
+            feedbackDiv.textContent = 'Error processing request: ' + error.message;
+            feedbackDiv.className = 'mt-2 text-red-600 text-sm';
+            debugDiv.textContent = 'Network error: ' + error.message;
+            debugDiv.style.display = 'block';
         }
     }
 </script>

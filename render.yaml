@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: hostify
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn Hostify.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: False

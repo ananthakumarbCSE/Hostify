@@ -44,7 +44,14 @@ def event_list_view(request):
 
 def event_detail_view(request, slug):
     
-    event      = get_object_or_404(Event, slug=slug, status="published")
+    event = get_object_or_404(Event, slug=slug)
+    
+    # Allow organizer to view their own events (draft or published)
+    # Allow anyone else only to view published events
+    if event.status != "published":
+        if not request.user.is_authenticated or event.organizer != request.user:
+            return get_object_or_404(Event, slug=slug, status="published")
+    
     sessions   = event.sessions.all()
     faqs       = event.faqs.all()
     reviews    = event.reviews.filter(is_visible=True).select_related("author").order_by("-created_at")

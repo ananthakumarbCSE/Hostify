@@ -9,3 +9,6 @@ groq
 qrcode[pil]
 Pillow
 gunicorn
+django-crispy-forms
+crispy-tailwind
+dj-database-url
