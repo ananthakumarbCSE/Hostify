@@ -2,22 +2,21 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             
-            <!-- Logo/Brand -->
             <a href="/" class="flex items-center space-x-2 group">
                 <div class="w-10 h-10 bg-serene-300 rounded-lg flex items-center justify-center group-hover:bg-serene-400 transition">
-                    <span class="text-white font-bold text-lg">E</span>
+                    <span class="text-white font-bold text-lg">H</span>
                 </div>
-                <span class="text-xl font-bold text-serene-900 hidden sm:inline">EventSphere</span>
+                <span class="text-xl font-bold text-serene-900 hidden sm:inline">Hostify</span>
             </a>
 
-            <!-- Center Navigation -->
+    
             <div class="hidden md:flex space-x-8">
                 <a href="{% url 'events:list' %}" class="text-serene-700 hover:text-serene-600 font-medium transition">
                     Browse Events
                 </a>
             </div>
 
-            <!-- Right Section -->
+    
             <div class="flex items-center space-x-4">
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard:events' %}" class="hidden md:inline-block text-serene-700 hover:text-serene-600 font-medium">
